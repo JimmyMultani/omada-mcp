@@ -135,7 +135,9 @@ Available at `http://localhost:3000/mcp` (stream) or `http://localhost:3000/sse`
 | `updateLanProfile` | Update a LAN profile |
 | `updateFirewallSetting` | Update firewall settings |
 | `createFirewallAcl` | Create a firewall ACL rule |
+| `updateFirewallAcl` | Update a firewall ACL rule |
 | `deleteFirewallAcl` | Delete a firewall ACL rule |
+| `updateSsid` | Update an SSID's configuration (e.g. enable/disable) |
 | `updateSwitchPort` | Update switch port config (profile, PoE, speed, STP) |
 | `updateClient` | Update client settings |
 | `setSwitchNetworks` | Set switch VLAN trunking configuration |

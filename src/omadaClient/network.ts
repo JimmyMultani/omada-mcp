@@ -136,6 +136,31 @@ export class NetworkOperations {
     }
 
     /**
+     * Update an SSID's configuration (v1 API).
+     * This is a full replace — pass the object returned by getSsidDetail with only the
+     * fields you want changed modified. Omitted fields (e.g. pskSetting) will be reset
+     * by the controller, not left untouched.
+     *
+     * @param wlanId - WLAN group ID (can be obtained from getWlanGroupList)
+     * @param ssidId - SSID ID (can be obtained from getSsidList)
+     */
+    public async updateSsid(wlanId: string, ssidId: string, data: Record<string, unknown>, siteId?: string): Promise<unknown> {
+        if (!wlanId) {
+            throw new Error('A wlanId must be provided. Use getWlanGroupList to get available WLAN group IDs.');
+        }
+        if (!ssidId) {
+            throw new Error('An ssidId must be provided. Use getSsidList to get available SSID IDs.');
+        }
+
+        const resolvedSiteId = this.site.resolveSiteId(siteId);
+        const path = this.buildPath(
+            `/sites/${encodeURIComponent(resolvedSiteId)}/wireless-network/wlans/${encodeURIComponent(wlanId)}/ssids/${encodeURIComponent(ssidId)}`
+        );
+        const response = await this.request.put<OmadaApiResponse<unknown>>(path, data);
+        return this.request.ensureSuccess(response);
+    }
+
+    /**
      * Get firewall settings for a site.
      * OperationId: getFirewallSetting
      */
@@ -293,6 +318,26 @@ export class NetworkOperations {
 
         const path = this.buildPath(`/sites/${encodeURIComponent(resolvedSiteId)}/setting/firewall/acls`);
         const response = await this.request.post<OmadaApiResponse<unknown>>(path, data);
+        return this.request.ensureSuccess(response);
+    }
+
+    /**
+     * Update an existing firewall ACL rule.
+     * Uses the internal web UI API when web credentials are configured (required for OC200),
+     * otherwise falls back to the Open API.
+     */
+    public async updateFirewallAcl(aclId: string, data: Record<string, unknown>, siteId?: string): Promise<unknown> {
+        const resolvedSiteId = this.site.resolveSiteId(siteId);
+
+        if (this.hasInternalApi) {
+            logger.info('Using internal API for updateFirewallAcl');
+            const path = `/sites/${encodeURIComponent(resolvedSiteId)}/setting/firewall/acls/${encodeURIComponent(aclId)}`;
+            const response = await this.internalRequest!.put<OmadaApiResponse<unknown>>(path, data);
+            return this.internalRequest!.ensureSuccess(response);
+        }
+
+        const path = this.buildPath(`/sites/${encodeURIComponent(resolvedSiteId)}/setting/firewall/acls/${encodeURIComponent(aclId)}`);
+        const response = await this.request.put<OmadaApiResponse<unknown>>(path, data);
         return this.request.ensureSuccess(response);
     }
 

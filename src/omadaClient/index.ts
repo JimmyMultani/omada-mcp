@@ -191,6 +191,10 @@ export class OmadaClient {
     }
 
     // Network write operations
+    public async updateSsid(wlanId: string, ssidId: string, data: Record<string, unknown>, siteId?: string): Promise<unknown> {
+        return await this.networkOps.updateSsid(wlanId, ssidId, data, siteId);
+    }
+
     public async createLanNetwork(data: Record<string, unknown>, siteId?: string): Promise<unknown> {
         return await this.networkOps.createLanNetwork(data, siteId);
     }
@@ -283,6 +287,10 @@ export class OmadaClient {
 
     public async createFirewallAcl(data: Record<string, unknown>, siteId?: string): Promise<unknown> {
         return await this.networkOps.createFirewallAcl(data, siteId);
+    }
+
+    public async updateFirewallAcl(aclId: string, data: Record<string, unknown>, siteId?: string): Promise<unknown> {
+        return await this.networkOps.updateFirewallAcl(aclId, data, siteId);
     }
 
     public async deleteFirewallAcl(aclId: string, siteId?: string): Promise<unknown> {
