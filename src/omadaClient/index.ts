@@ -195,6 +195,10 @@ export class OmadaClient {
         return await this.networkOps.updateSsid(wlanId, ssidId, data, siteId);
     }
 
+    public async setSsidEnable(ssidId: string, enable: boolean, siteId?: string): Promise<unknown> {
+        return await this.networkOps.setSsidEnable(ssidId, enable, siteId);
+    }
+
     public async createLanNetwork(data: Record<string, unknown>, siteId?: string): Promise<unknown> {
         return await this.networkOps.createLanNetwork(data, siteId);
     }

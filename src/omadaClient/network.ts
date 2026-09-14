@@ -136,10 +136,12 @@ export class NetworkOperations {
     }
 
     /**
-     * Update an SSID's configuration (v1 API).
-     * This is a full replace — pass the object returned by getSsidDetail with only the
-     * fields you want changed modified. Omitted fields (e.g. pskSetting) will be reset
-     * by the controller, not left untouched.
+     * Update an SSID's basic config (v1 API): name, band, security, VLAN, PSK, PMF, 802.11r, etc.
+     * This does NOT control ssidEnable (use setSsidEnable) and does not touch schedule, rate
+     * limit/control, MAC filter, multicast, or Hotspot 2.0 settings — those are separate
+     * sub-resource endpoints the Omada Open API exposes independently.
+     * Required fields per Omada's spec: band, broadcast, enable11r, guestNetEnable, mloEnable,
+     * name, pmfMode, security, vlanEnable.
      *
      * @param wlanId - WLAN group ID (can be obtained from getWlanGroupList)
      * @param ssidId - SSID ID (can be obtained from getSsidList)
@@ -154,9 +156,28 @@ export class NetworkOperations {
 
         const resolvedSiteId = this.site.resolveSiteId(siteId);
         const path = this.buildPath(
-            `/sites/${encodeURIComponent(resolvedSiteId)}/wireless-network/wlans/${encodeURIComponent(wlanId)}/ssids/${encodeURIComponent(ssidId)}`
+            `/sites/${encodeURIComponent(resolvedSiteId)}/wireless-network/wlans/${encodeURIComponent(wlanId)}/ssids/${encodeURIComponent(ssidId)}/update-basic-config`
         );
-        const response = await this.request.put<OmadaApiResponse<unknown>>(path, data);
+        const response = await this.request.request<OmadaApiResponse<unknown>>({ method: 'PATCH', url: path, data });
+        return this.request.ensureSuccess(response);
+    }
+
+    /**
+     * Enable or disable an SSID network-wide.
+     * Not part of the documented Open API surface — confirmed by capturing the controller's own
+     * web UI network traffic, since neither PUT/PATCH on /ssids/{ssidId} (405, GET/DELETE only)
+     * nor the update-basic-config sub-resource honors an ssidEnable field.
+     *
+     * @param ssidId - SSID ID (can be obtained from getSsidList)
+     */
+    public async setSsidEnable(ssidId: string, enable: boolean, siteId?: string): Promise<unknown> {
+        if (!ssidId) {
+            throw new Error('An ssidId must be provided. Use getSsidList to get available SSID IDs.');
+        }
+
+        const resolvedSiteId = this.site.resolveSiteId(siteId);
+        const path = this.buildPath(`/sites/${encodeURIComponent(resolvedSiteId)}/wireless-network/ssids/${encodeURIComponent(ssidId)}/enable`);
+        const response = await this.request.request<OmadaApiResponse<unknown>>({ method: 'PATCH', url: path, data: { ssidEnable: enable } });
         return this.request.ensureSuccess(response);
     }
 

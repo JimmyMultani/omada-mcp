@@ -11,9 +11,12 @@ const updateSsidSchema = z.object({
     ssid: z
         .record(z.unknown())
         .describe(
-            'SSID fields to update, same shape returned by getSsidDetail. This is a full replace: fetch getSsidDetail first, ' +
-                'change only the field(s) you want (e.g. set ssidEnable to false to disable the SSID), and pass the complete ' +
-                'object back — omitted fields (including pskSetting) will be reset by the controller, not left untouched.'
+            "SSID basic-config fields, same shape as getSsidDetail's basic fields (name, band, security, broadcast, vlanEnable, " +
+                'vlanId, pskSetting, entSetting, ppskSetting, mloEnable, pmfMode, enable11r, hidePwd, greEnable, vlanSetting, ' +
+                'prohibitWifiShare). Required by the controller on every call: band, broadcast, enable11r, guestNetEnable, ' +
+                'mloEnable, name, pmfMode, security, vlanEnable — fetch getSsidDetail first and include these even if unchanged. ' +
+                'Does NOT control ssidEnable (use setSsidEnable to enable/disable the SSID) and does not touch schedule, rate ' +
+                'limit/control, MAC filter, multicast, or Hotspot 2.0 settings.'
         ),
 });
 
@@ -22,9 +25,9 @@ export function registerUpdateSsidTool(server: McpServer, client: OmadaClient): 
         'updateSsid',
         {
             description:
-                'Update an SSID (wireless network) configuration, including enabling/disabling it via ssidEnable. ' +
-                'Requires wlanId (from getWlanGroupList) and ssidId (from getSsidList). ' +
-                'Fetch getSsidDetail first and pass the full object back with your changes — this is a full replace, not a merge.',
+                "Update an SSID's basic configuration (name, band, security, VLAN, PSK, PMF mode, 802.11r, etc). " +
+                'Requires wlanId (from getWlanGroupList) and ssidId (from getSsidList). To enable/disable the SSID, use ' +
+                'setSsidEnable instead — this tool does not support that.',
             inputSchema: updateSsidSchema.shape,
             annotations: {
                 destructiveHint: true,
