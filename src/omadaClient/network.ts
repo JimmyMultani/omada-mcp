@@ -46,7 +46,13 @@ export class NetworkOperations {
 
     /**
      * Get port forwarding status for a specific type (User or UPnP).
-     * OperationId: getPortForwardStatus
+     *
+     * For 'User' rules, uses the internal web UI API (`/setting/transmission/portForwardings`)
+     * when web credentials are configured — confirmed by capturing the controller's own web UI
+     * network traffic; the public Open API's documented `insight/port-forwarding` path returns
+     * "Invalid request parameters" on this controller (likely an Insight-feature gate rather than
+     * a real listing endpoint). 'UPnP' has no known internal-API equivalent yet, so it still uses
+     * the original (unverified) public path.
      *
      * @param type - Port forwarding type: 'User' or 'UPnP'
      * @param siteId - Optional site ID (uses default if not provided)
@@ -55,6 +61,17 @@ export class NetworkOperations {
      */
     public async getPortForwardingStatus(type: 'User' | 'UPnP', siteId?: string, page = 1, pageSize = 10): Promise<PaginatedResult<unknown>> {
         const resolvedSiteId = this.site.resolveSiteId(siteId);
+
+        if (type === 'User' && this.hasInternalApi) {
+            logger.info('Using internal API for getPortForwardingStatus (User)');
+            const path = `/sites/${encodeURIComponent(resolvedSiteId)}/setting/transmission/portForwardings`;
+            const response = await this.internalRequest!.get<OmadaApiResponse<PaginatedResult<unknown>>>(path, {
+                currentPage: page,
+                currentPageSize: pageSize,
+            });
+            return this.internalRequest!.ensureSuccess(response);
+        }
+
         const path = this.buildPath(`/sites/${encodeURIComponent(resolvedSiteId)}/insight/port-forwarding/${encodeURIComponent(type)}`);
 
         const response = await this.request.get<OmadaApiResponse<PaginatedResult<unknown>>>(path, {
@@ -406,11 +423,127 @@ export class NetworkOperations {
     }
 
     /**
-     * List static routes for a site (v1 API).
+     * List static routes for a site.
+     * Uses the internal web UI API (`/setting/transmission/staticRoutings`) when web credentials
+     * are configured — confirmed by capturing the controller's own web UI network traffic; the
+     * public Open API path this previously called (`/setting/routes`) 404s and appears to not
+     * exist. Falls back to that public path (unverified) when internal auth isn't available.
+     * Only fetches the first 100 routes; fine for a typical site's route table but not truly
+     * paginated like the public-API-backed list methods.
      */
     public async listRoutes(siteId?: string): Promise<unknown[]> {
         const resolvedSiteId = this.site.resolveSiteId(siteId);
+
+        if (this.hasInternalApi) {
+            logger.info('Using internal API for listRoutes');
+            const path = `/sites/${encodeURIComponent(resolvedSiteId)}/setting/transmission/staticRoutings`;
+            const response = await this.internalRequest!.get<OmadaApiResponse<PaginatedResult<unknown>>>(path, {
+                currentPage: 1,
+                currentPageSize: 100,
+            });
+            const result = this.internalRequest!.ensureSuccess(response);
+            return result.data ?? [];
+        }
+
         const path = this.buildPath(`/sites/${encodeURIComponent(resolvedSiteId)}/setting/routes`);
         return await this.request.fetchPaginated<unknown>(path);
+    }
+
+    /**
+     * Create a static route. Internal API only — there is no known public Open API equivalent.
+     * `data` shape confirmed by capturing the controller's own web UI traffic, e.g.:
+     * `{ name, status, destinations: ["203.0.113.0/24"], routeType: 0, nextHopIp: "192.168.0.1", metric: "15" }`
+     * (`routeType: 0` = Next Hop; the UI also offers an Interface route type, not yet captured).
+     */
+    public async createRoute(data: Record<string, unknown>, siteId?: string): Promise<unknown> {
+        const resolvedSiteId = this.site.resolveSiteId(siteId);
+        this.requireInternalApi('createRoute');
+
+        const path = `/sites/${encodeURIComponent(resolvedSiteId)}/setting/transmission/staticRoutings`;
+        const response = await this.internalRequest!.post<OmadaApiResponse<unknown>>(path, data);
+        return this.internalRequest!.ensureSuccess(response);
+    }
+
+    /**
+     * Update an existing static route. Internal API only. Same body shape as `createRoute`.
+     */
+    public async updateRoute(routeId: string, data: Record<string, unknown>, siteId?: string): Promise<unknown> {
+        const resolvedSiteId = this.site.resolveSiteId(siteId);
+        this.requireInternalApi('updateRoute');
+
+        const path = `/sites/${encodeURIComponent(resolvedSiteId)}/setting/transmission/staticRoutings/${encodeURIComponent(routeId)}`;
+        const response = await this.internalRequest!.put<OmadaApiResponse<unknown>>(path, data);
+        return this.internalRequest!.ensureSuccess(response);
+    }
+
+    /**
+     * Delete a static route by its ID. Internal API only.
+     */
+    public async deleteRoute(routeId: string, siteId?: string): Promise<unknown> {
+        const resolvedSiteId = this.site.resolveSiteId(siteId);
+        this.requireInternalApi('deleteRoute');
+
+        const path = `/sites/${encodeURIComponent(resolvedSiteId)}/setting/transmission/staticRoutings/${encodeURIComponent(routeId)}`;
+        const response = await this.internalRequest!.delete<OmadaApiResponse<unknown>>(path);
+        return this.internalRequest!.ensureSuccess(response);
+    }
+
+    /**
+     * Create a port forwarding rule. Internal API only — there is no known public Open API
+     * equivalent (the public `insight/port-forwarding` path is read-only and, per
+     * `getPortForwardingStatus`, doesn't reliably work on this controller anyway).
+     * `data` shape confirmed by capturing the controller's own web UI traffic, e.g.:
+     * `{ name, status, dMZ: false, externalPort: "59999", forwardIp: "192.168.0.253",
+     *   forwardPort: "59999", protocol: 1, from: 0, interfaceWanPortId: ["<wan-port-id>"],
+     *   virtualWanId: [], featureDescription: [] }`
+     * (`protocol`: 0 = All, 1 = TCP, 2 = UDP. `interfaceWanPortId` values come from the WAN port
+     * IDs in `getInternetInfo`'s `wanPortSettings`.)
+     */
+    public async createPortForward(data: Record<string, unknown>, siteId?: string): Promise<unknown> {
+        const resolvedSiteId = this.site.resolveSiteId(siteId);
+        this.requireInternalApi('createPortForward');
+
+        const path = `/sites/${encodeURIComponent(resolvedSiteId)}/setting/transmission/portForwardings`;
+        const response = await this.internalRequest!.post<OmadaApiResponse<unknown>>(path, data);
+        return this.internalRequest!.ensureSuccess(response);
+    }
+
+    /**
+     * Update an existing port forwarding rule. Internal API only. Same body shape as
+     * `createPortForward`.
+     */
+    public async updatePortForward(ruleId: string, data: Record<string, unknown>, siteId?: string): Promise<unknown> {
+        const resolvedSiteId = this.site.resolveSiteId(siteId);
+        this.requireInternalApi('updatePortForward');
+
+        const path = `/sites/${encodeURIComponent(resolvedSiteId)}/setting/transmission/portForwardings/${encodeURIComponent(ruleId)}`;
+        const response = await this.internalRequest!.put<OmadaApiResponse<unknown>>(path, data);
+        return this.internalRequest!.ensureSuccess(response);
+    }
+
+    /**
+     * Delete a port forwarding rule by its ID. Internal API only.
+     */
+    public async deletePortForward(ruleId: string, siteId?: string): Promise<unknown> {
+        const resolvedSiteId = this.site.resolveSiteId(siteId);
+        this.requireInternalApi('deletePortForward');
+
+        const path = `/sites/${encodeURIComponent(resolvedSiteId)}/setting/transmission/portForwardings/${encodeURIComponent(ruleId)}`;
+        const response = await this.internalRequest!.delete<OmadaApiResponse<unknown>>(path);
+        return this.internalRequest!.ensureSuccess(response);
+    }
+
+    /**
+     * Throw a clear, actionable error when an internal-API-only operation is called without
+     * OMADA_WEB_USERNAME/OMADA_WEB_PASSWORD configured, instead of a confusing null-pointer
+     * failure from calling a method on `this.internalRequest` when it's undefined.
+     */
+    private requireInternalApi(operation: string): void {
+        if (!this.hasInternalApi) {
+            throw new Error(
+                `${operation} requires the internal web UI API. ` +
+                    'Set OMADA_WEB_USERNAME and OMADA_WEB_PASSWORD environment variables to enable it.'
+            );
+        }
     }
 }
