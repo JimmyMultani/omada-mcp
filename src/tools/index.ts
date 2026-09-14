@@ -48,6 +48,7 @@ import { registerReconnectClientTool } from './reconnectClient.js';
 import { registerSearchDevicesTool } from './searchDevices.js';
 import { registerSetDeviceLedTool } from './setDeviceLed.js';
 import { registerSetGatewayWanConnectTool } from './setGatewayWanConnect.js';
+import { registerSetSsidEnableTool } from './setSsidEnable.js';
 import { registerSetSwitchNetworksTool } from './setSwitchNetworks.js';
 import { registerSetSwitchPortNameTool } from './setSwitchPortName.js';
 import { registerSetSwitchPortPoeTool } from './setSwitchPortPoe.js';
@@ -58,9 +59,11 @@ import { registerStartCableTestTool } from './startCableTest.js';
 import { registerStartFirmwareUpgradeTool } from './startFirmwareUpgrade.js';
 import { registerUnblockClientTool } from './unblockClient.js';
 import { registerUpdateClientTool } from './updateClient.js';
+import { registerUpdateFirewallAclTool } from './updateFirewallAcl.js';
 import { registerUpdateFirewallSettingTool } from './updateFirewallSetting.js';
 import { registerUpdateLanNetworkTool } from './updateLanNetwork.js';
 import { registerUpdateLanProfileTool } from './updateLanProfile.js';
+import { registerUpdateSsidTool } from './updateSsid.js';
 import { registerUpdateSwitchPortTool } from './updateSwitchPort.js';
 
 export function registerAllTools(server: McpServer, client: OmadaClient): void {
@@ -104,7 +107,10 @@ export function registerAllTools(server: McpServer, client: OmadaClient): void {
     registerUpdateLanProfileTool(server, client);
     registerUpdateFirewallSettingTool(server, client);
     registerCreateFirewallAclTool(server, client);
+    registerUpdateFirewallAclTool(server, client);
     registerDeleteFirewallAclTool(server, client);
+    registerUpdateSsidTool(server, client);
+    registerSetSsidEnableTool(server, client);
     registerUpdateSwitchPortTool(server, client);
     registerUpdateClientTool(server, client);
     registerSetSwitchNetworksTool(server, client);

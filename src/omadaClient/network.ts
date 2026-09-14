@@ -136,6 +136,52 @@ export class NetworkOperations {
     }
 
     /**
+     * Update an SSID's basic config (v1 API): name, band, security, VLAN, PSK, PMF, 802.11r, etc.
+     * This does NOT control ssidEnable (use setSsidEnable) and does not touch schedule, rate
+     * limit/control, MAC filter, multicast, or Hotspot 2.0 settings — those are separate
+     * sub-resource endpoints the Omada Open API exposes independently.
+     * Required fields per Omada's spec: band, broadcast, enable11r, guestNetEnable, mloEnable,
+     * name, pmfMode, security, vlanEnable.
+     *
+     * @param wlanId - WLAN group ID (can be obtained from getWlanGroupList)
+     * @param ssidId - SSID ID (can be obtained from getSsidList)
+     */
+    public async updateSsid(wlanId: string, ssidId: string, data: Record<string, unknown>, siteId?: string): Promise<unknown> {
+        if (!wlanId) {
+            throw new Error('A wlanId must be provided. Use getWlanGroupList to get available WLAN group IDs.');
+        }
+        if (!ssidId) {
+            throw new Error('An ssidId must be provided. Use getSsidList to get available SSID IDs.');
+        }
+
+        const resolvedSiteId = this.site.resolveSiteId(siteId);
+        const path = this.buildPath(
+            `/sites/${encodeURIComponent(resolvedSiteId)}/wireless-network/wlans/${encodeURIComponent(wlanId)}/ssids/${encodeURIComponent(ssidId)}/update-basic-config`
+        );
+        const response = await this.request.request<OmadaApiResponse<unknown>>({ method: 'PATCH', url: path, data });
+        return this.request.ensureSuccess(response);
+    }
+
+    /**
+     * Enable or disable an SSID network-wide.
+     * Not part of the documented Open API surface — confirmed by capturing the controller's own
+     * web UI network traffic, since neither PUT/PATCH on /ssids/{ssidId} (405, GET/DELETE only)
+     * nor the update-basic-config sub-resource honors an ssidEnable field.
+     *
+     * @param ssidId - SSID ID (can be obtained from getSsidList)
+     */
+    public async setSsidEnable(ssidId: string, enable: boolean, siteId?: string): Promise<unknown> {
+        if (!ssidId) {
+            throw new Error('An ssidId must be provided. Use getSsidList to get available SSID IDs.');
+        }
+
+        const resolvedSiteId = this.site.resolveSiteId(siteId);
+        const path = this.buildPath(`/sites/${encodeURIComponent(resolvedSiteId)}/wireless-network/ssids/${encodeURIComponent(ssidId)}/enable`);
+        const response = await this.request.request<OmadaApiResponse<unknown>>({ method: 'PATCH', url: path, data: { ssidEnable: enable } });
+        return this.request.ensureSuccess(response);
+    }
+
+    /**
      * Get firewall settings for a site.
      * OperationId: getFirewallSetting
      */
@@ -293,6 +339,26 @@ export class NetworkOperations {
 
         const path = this.buildPath(`/sites/${encodeURIComponent(resolvedSiteId)}/setting/firewall/acls`);
         const response = await this.request.post<OmadaApiResponse<unknown>>(path, data);
+        return this.request.ensureSuccess(response);
+    }
+
+    /**
+     * Update an existing firewall ACL rule.
+     * Uses the internal web UI API when web credentials are configured (required for OC200),
+     * otherwise falls back to the Open API.
+     */
+    public async updateFirewallAcl(aclId: string, data: Record<string, unknown>, siteId?: string): Promise<unknown> {
+        const resolvedSiteId = this.site.resolveSiteId(siteId);
+
+        if (this.hasInternalApi) {
+            logger.info('Using internal API for updateFirewallAcl');
+            const path = `/sites/${encodeURIComponent(resolvedSiteId)}/setting/firewall/acls/${encodeURIComponent(aclId)}`;
+            const response = await this.internalRequest!.put<OmadaApiResponse<unknown>>(path, data);
+            return this.internalRequest!.ensureSuccess(response);
+        }
+
+        const path = this.buildPath(`/sites/${encodeURIComponent(resolvedSiteId)}/setting/firewall/acls/${encodeURIComponent(aclId)}`);
+        const response = await this.request.put<OmadaApiResponse<unknown>>(path, data);
         return this.request.ensureSuccess(response);
     }
 
