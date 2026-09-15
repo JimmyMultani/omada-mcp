@@ -236,9 +236,10 @@ export class OmadaClient {
         page?: number,
         pageSize?: number,
         timeStart?: number,
-        timeEnd?: number
+        timeEnd?: number,
+        module?: 'System' | 'Device' | 'Client'
     ): Promise<PaginatedResult<unknown>> {
-        return await this.networkOps.listEvents(siteId, page, pageSize, timeStart, timeEnd);
+        return await this.networkOps.listEvents(siteId, page, pageSize, timeStart, timeEnd, module);
     }
 
     public async listLogs(siteId?: string, page?: number, pageSize?: number): Promise<PaginatedResult<unknown>> {

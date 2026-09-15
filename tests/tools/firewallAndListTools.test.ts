@@ -195,7 +195,20 @@ describe('Firewall, IP Group, Route, and Log List Tools', () => {
                 expect.objectContaining({ description: expect.any(String) }),
                 expect.any(Function)
             );
-            expect(mockClient.listEvents).toHaveBeenCalledWith('test-site', 2, 25, undefined, undefined);
+            expect(mockClient.listEvents).toHaveBeenCalledWith('test-site', 2, 25, undefined, undefined, undefined);
+        });
+
+        it('should pass the module filter through to the client', async () => {
+            const { registerListEventsTool } = await import('../../src/tools/listEvents.js');
+
+            const mockClient = { listEvents: vi.fn().mockResolvedValue([]) };
+            const mockServer = {
+                registerTool: vi.fn((_, _schema, handler) => handler({ siteId: 'test-site', page: 1, pageSize: 10, module: 'Client' }, {})),
+            };
+
+            registerListEventsTool(mockServer as never, mockClient as never);
+
+            expect(mockClient.listEvents).toHaveBeenCalledWith('test-site', 1, 10, undefined, undefined, 'Client');
         });
     });
 
