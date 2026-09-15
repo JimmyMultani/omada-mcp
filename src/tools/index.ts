@@ -11,8 +11,12 @@ import { registerBlockClientTool } from './blockClient.js';
 import { registerCreateFirewallAclTool } from './createFirewallAcl.js';
 import { registerCreateLanNetworkTool } from './createLanNetwork.js';
 import { registerCreateLanProfileTool } from './createLanProfile.js';
+import { registerCreatePortForwardTool } from './createPortForward.js';
+import { registerCreateRouteTool } from './createRoute.js';
 import { registerDeleteFirewallAclTool } from './deleteFirewallAcl.js';
 import { registerDeleteLanNetworkTool } from './deleteLanNetwork.js';
+import { registerDeletePortForwardTool } from './deletePortForward.js';
+import { registerDeleteRouteTool } from './deleteRoute.js';
 import { registerGenericApiCallTool } from './genericApiCall.js';
 import { registerGetCableTestResultsTool } from './getCableTestResults.js';
 import { registerGetClientTool } from './getClient.js';
@@ -63,6 +67,8 @@ import { registerUpdateFirewallAclTool } from './updateFirewallAcl.js';
 import { registerUpdateFirewallSettingTool } from './updateFirewallSetting.js';
 import { registerUpdateLanNetworkTool } from './updateLanNetwork.js';
 import { registerUpdateLanProfileTool } from './updateLanProfile.js';
+import { registerUpdatePortForwardTool } from './updatePortForward.js';
+import { registerUpdateRouteTool } from './updateRoute.js';
 import { registerUpdateSsidTool } from './updateSsid.js';
 import { registerUpdateSwitchPortTool } from './updateSwitchPort.js';
 
@@ -114,6 +120,12 @@ export function registerAllTools(server: McpServer, client: OmadaClient): void {
     registerUpdateSwitchPortTool(server, client);
     registerUpdateClientTool(server, client);
     registerSetSwitchNetworksTool(server, client);
+    registerCreateRouteTool(server, client);
+    registerUpdateRouteTool(server, client);
+    registerDeleteRouteTool(server, client);
+    registerCreatePortForwardTool(server, client);
+    registerUpdatePortForwardTool(server, client);
+    registerDeletePortForwardTool(server, client);
 
     // Switch port tools
     registerSetSwitchPortProfileTool(server, client);

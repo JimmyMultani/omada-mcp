@@ -74,6 +74,26 @@ describe('InternalRequestHandler', () => {
         });
     });
 
+    describe('put', () => {
+        it('should make a PUT request with the given body', async () => {
+            const { InternalRequestHandler } = await import('../../src/omadaClient/internalRequest.js');
+
+            mockAxiosInstance.request.mockResolvedValue({ status: 200, data: { errorCode: 0, result: {} } });
+
+            const handler = new InternalRequestHandler(mockAxiosInstance as never, mockAuthManager as never, 'test-omadac');
+            const body = { name: 'claude-mcp-test', metric: '5' };
+            await handler.put('/sites/site-123/setting/transmission/staticRoutings/route-1', body);
+
+            expect(mockAxiosInstance.request).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    method: 'PUT',
+                    url: '/test-omadac/api/v2/sites/site-123/setting/transmission/staticRoutings/route-1',
+                    data: body,
+                })
+            );
+        });
+    });
+
     describe('delete', () => {
         it('should make a DELETE request', async () => {
             const { InternalRequestHandler } = await import('../../src/omadaClient/internalRequest.js');

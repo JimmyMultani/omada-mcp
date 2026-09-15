@@ -1,6 +1,6 @@
 # Omada MCP Server
 
-Full CRUD MCP server for TP-Link Omada SDN controllers. Exposes 60+ tools for reading, writing, and managing sites, devices, clients, networks, switch ports, firewalls, and more — all via the Model Context Protocol.
+Full CRUD MCP server for TP-Link Omada SDN controllers. Exposes 70+ tools for reading, writing, and managing sites, devices, clients, networks, switch ports, firewalls, and more — all via the Model Context Protocol.
 
 ## Quick Start
 
@@ -107,7 +107,7 @@ Available at `http://localhost:3000/mcp` (stream) or `http://localhost:3000/sse`
 | `listClientsPastConnections` | Historical client connections |
 | `getThreatList` | Security threat list with filtering |
 | `getInternetInfo` | Internet / WAN configuration |
-| `getPortForwardingStatus` | Port forwarding rules (User/UPnP) |
+| `getPortForwardingStatus` | Port forwarding rules (User uses the internal web UI API when `OMADA_WEB_USERNAME`/`OMADA_WEB_PASSWORD` are set; UPnP uses the public Open API) |
 | `getLanNetworkList` | LAN networks and VLAN settings |
 | `getLanProfileList` | LAN profiles for switch ports |
 | `getWlanGroupList` | WLAN groups |
@@ -119,7 +119,7 @@ Available at `http://localhost:3000/mcp` (stream) or `http://localhost:3000/sse`
 | `listEvents` | Paginated site events |
 | `listLogs` | Paginated site logs |
 | `listFirewallAcls` | Firewall ACL rules |
-| `listRoutes` | Static routes |
+| `listRoutes` | Static routes (internal web UI API only, requires `OMADA_WEB_USERNAME`/`OMADA_WEB_PASSWORD`) |
 | `getSwitch` | Full switch info including portList array |
 | `getCableTestResults` | Cable test results for a switch |
 | `getSwitchNetworks` | Switch VLAN trunking configuration |
@@ -142,6 +142,12 @@ Available at `http://localhost:3000/mcp` (stream) or `http://localhost:3000/sse`
 | `updateSwitchPort` | Update switch port config (profile, PoE, speed, STP) |
 | `updateClient` | Update client settings |
 | `setSwitchNetworks` | Set switch VLAN trunking configuration |
+| `createRoute` | Create a static route (internal web UI API only) |
+| `updateRoute` | Update a static route by ID (internal web UI API only) |
+| `deleteRoute` | Delete a static route by ID (internal web UI API only) |
+| `createPortForward` | Create a port forwarding rule (internal web UI API only) |
+| `updatePortForward` | Update a port forwarding rule by ID (internal web UI API only) |
+| `deletePortForward` | Delete a port forwarding rule by ID (internal web UI API only) |
 
 ### Switch Port Tools
 

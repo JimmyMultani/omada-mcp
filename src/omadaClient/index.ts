@@ -305,6 +305,30 @@ export class OmadaClient {
         return await this.networkOps.listRoutes(siteId);
     }
 
+    public async createRoute(data: Record<string, unknown>, siteId?: string): Promise<unknown> {
+        return await this.networkOps.createRoute(data, siteId);
+    }
+
+    public async updateRoute(routeId: string, data: Record<string, unknown>, siteId?: string): Promise<unknown> {
+        return await this.networkOps.updateRoute(routeId, data, siteId);
+    }
+
+    public async deleteRoute(routeId: string, siteId?: string): Promise<unknown> {
+        return await this.networkOps.deleteRoute(routeId, siteId);
+    }
+
+    public async createPortForward(data: Record<string, unknown>, siteId?: string): Promise<unknown> {
+        return await this.networkOps.createPortForward(data, siteId);
+    }
+
+    public async updatePortForward(ruleId: string, data: Record<string, unknown>, siteId?: string): Promise<unknown> {
+        return await this.networkOps.updatePortForward(ruleId, data, siteId);
+    }
+
+    public async deletePortForward(ruleId: string, siteId?: string): Promise<unknown> {
+        return await this.networkOps.deletePortForward(ruleId, siteId);
+    }
+
     // Switch operations
     public async getSwitch(switchMac: string, siteId?: string): Promise<unknown> {
         return await this.switchOps.getSwitch(switchMac, siteId);

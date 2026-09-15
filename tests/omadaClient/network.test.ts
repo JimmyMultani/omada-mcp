@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { InternalRequestHandler } from '../../src/omadaClient/internalRequest.js';
 import { NetworkOperations } from '../../src/omadaClient/network.js';
 import type { RequestHandler } from '../../src/omadaClient/request.js';
 import type { SiteOperations } from '../../src/omadaClient/site.js';
@@ -8,12 +9,16 @@ import type { OmadaApiResponse, PaginatedResult } from '../../src/types/index.js
 describe('NetworkOperations', () => {
     let networkOps: NetworkOperations;
     let mockRequest: RequestHandler;
+    let mockInternalRequest: InternalRequestHandler;
     let mockSite: SiteOperations;
     let mockBuildPath: (path: string, version?: string) => string;
 
     beforeEach(() => {
         mockRequest = {
             get: vi.fn(),
+            post: vi.fn(),
+            put: vi.fn(),
+            delete: vi.fn(),
             fetchPaginated: vi.fn(),
             ensureSuccess: vi.fn((response: OmadaApiResponse<unknown>) => {
                 if (response.errorCode === 0) {
@@ -22,6 +27,19 @@ describe('NetworkOperations', () => {
                 throw new Error(response.msg ?? 'API Error');
             }),
         } as unknown as RequestHandler;
+
+        mockInternalRequest = {
+            get: vi.fn(),
+            post: vi.fn(),
+            put: vi.fn(),
+            delete: vi.fn(),
+            ensureSuccess: vi.fn((response: OmadaApiResponse<unknown>) => {
+                if (response.errorCode === 0) {
+                    return response.result;
+                }
+                throw new Error(response.msg ?? 'Internal API Error');
+            }),
+        } as unknown as InternalRequestHandler;
 
         mockSite = {
             resolveSiteId: vi.fn((siteId?: string) => siteId ?? 'default-site'),
@@ -235,6 +253,229 @@ describe('NetworkOperations', () => {
 
             expect(mockRequest.get).toHaveBeenCalledWith('/openapi/v1/test-omadac/sites/site-123/firewall');
             expect(result).toEqual(mockData);
+        });
+    });
+
+    describe('getPortForwardingStatus with internal API', () => {
+        it('should use the internal API for User type when internal API is available', async () => {
+            networkOps.setInternalRequest(mockInternalRequest);
+
+            const mockResult: PaginatedResult<unknown> = {
+                data: [{ name: 'Rule1', externalPort: '80' }],
+                totalRows: 1,
+                currentPage: 1,
+                currentSize: 10,
+            };
+            const mockResponse: OmadaApiResponse<PaginatedResult<unknown>> = {
+                errorCode: 0,
+                result: mockResult,
+            };
+
+            vi.mocked(mockInternalRequest.get).mockResolvedValue(mockResponse);
+
+            const result = await networkOps.getPortForwardingStatus('User', 'site-123', 1, 10);
+
+            expect(mockInternalRequest.get).toHaveBeenCalledWith('/sites/site-123/setting/transmission/portForwardings', {
+                currentPage: 1,
+                currentPageSize: 10,
+            });
+            expect(mockRequest.get).not.toHaveBeenCalled();
+            expect(result).toEqual(mockResult);
+        });
+
+        it('should still use the public API for UPnP type even when internal API is available', async () => {
+            networkOps.setInternalRequest(mockInternalRequest);
+
+            const mockResponse: OmadaApiResponse<PaginatedResult<unknown>> = {
+                errorCode: 0,
+                result: { data: [], totalRows: 0, currentPage: 1, currentSize: 10 },
+            };
+
+            vi.mocked(mockRequest.get).mockResolvedValue(mockResponse);
+
+            await networkOps.getPortForwardingStatus('UPnP', 'site-123', 1, 10);
+
+            expect(mockRequest.get).toHaveBeenCalledWith('/openapi/v1/test-omadac/sites/site-123/insight/port-forwarding/UPnP', {
+                page: 1,
+                pageSize: 10,
+            });
+            expect(mockInternalRequest.get).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('listRoutes', () => {
+        it('should use the internal API when available', async () => {
+            networkOps.setInternalRequest(mockInternalRequest);
+
+            const mockRoutes = [{ id: 'route-1', name: 'claude-mcp-test', metric: 15 }];
+            const mockResponse: OmadaApiResponse<PaginatedResult<unknown>> = {
+                errorCode: 0,
+                result: { data: mockRoutes, totalRows: 1, currentPage: 1, currentSize: 100 },
+            };
+
+            vi.mocked(mockInternalRequest.get).mockResolvedValue(mockResponse);
+
+            const result = await networkOps.listRoutes('site-123');
+
+            expect(mockInternalRequest.get).toHaveBeenCalledWith('/sites/site-123/setting/transmission/staticRoutings', {
+                currentPage: 1,
+                currentPageSize: 100,
+            });
+            expect(result).toEqual(mockRoutes);
+        });
+
+        it('should fall back to the public API when internal API is not available', async () => {
+            const mockRoutes = [{ id: 'route-1' }];
+            vi.mocked(mockRequest.fetchPaginated).mockResolvedValue(mockRoutes);
+
+            const result = await networkOps.listRoutes('site-123');
+
+            expect(mockRequest.fetchPaginated).toHaveBeenCalledWith('/openapi/v1/test-omadac/sites/site-123/setting/routes');
+            expect(result).toEqual(mockRoutes);
+        });
+    });
+
+    describe('createRoute', () => {
+        it('should create a route via the internal API', async () => {
+            networkOps.setInternalRequest(mockInternalRequest);
+
+            const routeData = {
+                name: 'claude-mcp-test',
+                status: true,
+                destinations: ['203.0.113.0/24'],
+                routeType: 0,
+                nextHopIp: '192.168.0.1',
+                metric: '15',
+            };
+            const mockResponse: OmadaApiResponse<unknown> = { errorCode: 0, result: {} };
+            vi.mocked(mockInternalRequest.post).mockResolvedValue(mockResponse);
+
+            await networkOps.createRoute(routeData, 'site-123');
+
+            expect(mockInternalRequest.post).toHaveBeenCalledWith('/sites/site-123/setting/transmission/staticRoutings', routeData);
+        });
+
+        it('should throw a clear error when internal API is not configured', async () => {
+            await expect(networkOps.createRoute({}, 'site-123')).rejects.toThrow(
+                'createRoute requires the internal web UI API. Set OMADA_WEB_USERNAME and OMADA_WEB_PASSWORD environment variables to enable it.'
+            );
+        });
+    });
+
+    describe('updateRoute', () => {
+        it('should update a route via the internal API', async () => {
+            networkOps.setInternalRequest(mockInternalRequest);
+
+            const routeData = {
+                name: 'claude-mcp-test',
+                status: true,
+                destinations: ['203.0.113.0/24'],
+                routeType: 0,
+                nextHopIp: '192.168.0.1',
+                metric: '5',
+            };
+            const mockResponse: OmadaApiResponse<unknown> = { errorCode: 0, result: {} };
+            vi.mocked(mockInternalRequest.put).mockResolvedValue(mockResponse);
+
+            await networkOps.updateRoute('route-1', routeData, 'site-123');
+
+            expect(mockInternalRequest.put).toHaveBeenCalledWith('/sites/site-123/setting/transmission/staticRoutings/route-1', routeData);
+        });
+
+        it('should throw a clear error when internal API is not configured', async () => {
+            await expect(networkOps.updateRoute('route-1', {}, 'site-123')).rejects.toThrow(
+                'updateRoute requires the internal web UI API. Set OMADA_WEB_USERNAME and OMADA_WEB_PASSWORD environment variables to enable it.'
+            );
+        });
+    });
+
+    describe('deleteRoute', () => {
+        it('should delete a route via the internal API', async () => {
+            networkOps.setInternalRequest(mockInternalRequest);
+
+            const mockResponse: OmadaApiResponse<unknown> = { errorCode: 0, result: {} };
+            vi.mocked(mockInternalRequest.delete).mockResolvedValue(mockResponse);
+
+            await networkOps.deleteRoute('route-1', 'site-123');
+
+            expect(mockInternalRequest.delete).toHaveBeenCalledWith('/sites/site-123/setting/transmission/staticRoutings/route-1');
+        });
+
+        it('should throw a clear error when internal API is not configured', async () => {
+            await expect(networkOps.deleteRoute('route-1', 'site-123')).rejects.toThrow(
+                'deleteRoute requires the internal web UI API. Set OMADA_WEB_USERNAME and OMADA_WEB_PASSWORD environment variables to enable it.'
+            );
+        });
+    });
+
+    describe('createPortForward', () => {
+        it('should create a port forwarding rule via the internal API', async () => {
+            networkOps.setInternalRequest(mockInternalRequest);
+
+            const ruleData = {
+                name: 'claude-mcp-test',
+                status: true,
+                dMZ: false,
+                externalPort: '59999',
+                forwardIp: '192.168.0.253',
+                forwardPort: '59999',
+                protocol: 1,
+                from: 0,
+                interfaceWanPortId: ['wan-1'],
+                virtualWanId: [],
+                featureDescription: [],
+            };
+            const mockResponse: OmadaApiResponse<unknown> = { errorCode: 0, result: {} };
+            vi.mocked(mockInternalRequest.post).mockResolvedValue(mockResponse);
+
+            await networkOps.createPortForward(ruleData, 'site-123');
+
+            expect(mockInternalRequest.post).toHaveBeenCalledWith('/sites/site-123/setting/transmission/portForwardings', ruleData);
+        });
+
+        it('should throw a clear error when internal API is not configured', async () => {
+            await expect(networkOps.createPortForward({}, 'site-123')).rejects.toThrow(
+                'createPortForward requires the internal web UI API. Set OMADA_WEB_USERNAME and OMADA_WEB_PASSWORD environment variables to enable it.'
+            );
+        });
+    });
+
+    describe('updatePortForward', () => {
+        it('should update a port forwarding rule via the internal API', async () => {
+            networkOps.setInternalRequest(mockInternalRequest);
+
+            const ruleData = { name: 'claude-mcp-test', externalPort: '60000', forwardPort: '60000' };
+            const mockResponse: OmadaApiResponse<unknown> = { errorCode: 0, result: {} };
+            vi.mocked(mockInternalRequest.put).mockResolvedValue(mockResponse);
+
+            await networkOps.updatePortForward('rule-1', ruleData, 'site-123');
+
+            expect(mockInternalRequest.put).toHaveBeenCalledWith('/sites/site-123/setting/transmission/portForwardings/rule-1', ruleData);
+        });
+
+        it('should throw a clear error when internal API is not configured', async () => {
+            await expect(networkOps.updatePortForward('rule-1', {}, 'site-123')).rejects.toThrow(
+                'updatePortForward requires the internal web UI API. Set OMADA_WEB_USERNAME and OMADA_WEB_PASSWORD environment variables to enable it.'
+            );
+        });
+    });
+
+    describe('deletePortForward', () => {
+        it('should delete a port forwarding rule via the internal API', async () => {
+            networkOps.setInternalRequest(mockInternalRequest);
+
+            const mockResponse: OmadaApiResponse<unknown> = { errorCode: 0, result: {} };
+            vi.mocked(mockInternalRequest.delete).mockResolvedValue(mockResponse);
+
+            await networkOps.deletePortForward('rule-1', 'site-123');
+
+            expect(mockInternalRequest.delete).toHaveBeenCalledWith('/sites/site-123/setting/transmission/portForwardings/rule-1');
+        });
+
+        it('should throw a clear error when internal API is not configured', async () => {
+            await expect(networkOps.deletePortForward('rule-1', 'site-123')).rejects.toThrow(
+                'deletePortForward requires the internal web UI API. Set OMADA_WEB_USERNAME and OMADA_WEB_PASSWORD environment variables to enable it.'
+            );
         });
     });
 });
