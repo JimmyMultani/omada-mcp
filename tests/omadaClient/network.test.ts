@@ -19,6 +19,7 @@ describe('NetworkOperations', () => {
             post: vi.fn(),
             put: vi.fn(),
             delete: vi.fn(),
+            request: vi.fn(),
             fetchPaginated: vi.fn(),
             ensureSuccess: vi.fn((response: OmadaApiResponse<unknown>) => {
                 if (response.errorCode === 0) {
@@ -141,6 +142,42 @@ describe('NetworkOperations', () => {
 
             expect(mockRequest.fetchPaginated).toHaveBeenCalledWith('/openapi/v2/test-omadac/sites/site-123/lan-networks');
             expect(result).toEqual(mockData);
+        });
+    });
+
+    describe('updateLanNetwork', () => {
+        it('should PATCH the v2 lan-networks endpoint (PUT 405s per the Open API spec)', async () => {
+            const mockResponse: OmadaApiResponse<unknown> = {
+                errorCode: 0,
+                result: {},
+            };
+            const data = { name: 'Default', dhcpSettings: { leaseTime: 86400 } };
+
+            vi.mocked(mockRequest.request).mockResolvedValue(mockResponse);
+
+            await networkOps.updateLanNetwork('net-1', data, 'site-123');
+
+            expect(mockRequest.request).toHaveBeenCalledWith({
+                method: 'PATCH',
+                url: '/openapi/v2/test-omadac/sites/site-123/lan-networks/net-1',
+                data,
+            });
+            expect(mockRequest.put).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('deleteLanNetwork', () => {
+        it('should DELETE the v1 lan-networks endpoint (v2 has no DELETE per the Open API spec)', async () => {
+            const mockResponse: OmadaApiResponse<unknown> = {
+                errorCode: 0,
+                result: {},
+            };
+
+            vi.mocked(mockRequest.delete).mockResolvedValue(mockResponse);
+
+            await networkOps.deleteLanNetwork('net-1', 'site-123');
+
+            expect(mockRequest.delete).toHaveBeenCalledWith('/openapi/v1/test-omadac/sites/site-123/lan-networks/net-1');
         });
     });
 

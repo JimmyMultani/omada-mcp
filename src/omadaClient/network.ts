@@ -221,20 +221,22 @@ export class NetworkOperations {
 
     /**
      * Update an existing LAN network (v2 API).
+     * The Open API spec's `/lan-networks/{networkId}` only exposes PATCH — PUT 405s.
      */
     public async updateLanNetwork(networkId: string, data: Record<string, unknown>, siteId?: string): Promise<unknown> {
         const resolvedSiteId = this.site.resolveSiteId(siteId);
         const path = this.buildPath(`/sites/${encodeURIComponent(resolvedSiteId)}/lan-networks/${encodeURIComponent(networkId)}`, 'v2');
-        const response = await this.request.put<OmadaApiResponse<unknown>>(path, data);
+        const response = await this.request.request<OmadaApiResponse<unknown>>({ method: 'PATCH', url: path, data });
         return this.request.ensureSuccess(response);
     }
 
     /**
-     * Delete a LAN network (v2 API).
+     * Delete a LAN network (v1 API).
+     * The v2 `/lan-networks/{networkId}` path only exposes PATCH — DELETE is v1-only.
      */
     public async deleteLanNetwork(networkId: string, siteId?: string): Promise<unknown> {
         const resolvedSiteId = this.site.resolveSiteId(siteId);
-        const path = this.buildPath(`/sites/${encodeURIComponent(resolvedSiteId)}/lan-networks/${encodeURIComponent(networkId)}`, 'v2');
+        const path = this.buildPath(`/sites/${encodeURIComponent(resolvedSiteId)}/lan-networks/${encodeURIComponent(networkId)}`);
         const response = await this.request.delete<OmadaApiResponse<unknown>>(path);
         return this.request.ensureSuccess(response);
     }
