@@ -134,6 +134,7 @@ Available at `http://localhost:3000/mcp` (stream) or `http://localhost:3000/sse`
 | `createLanProfile` | Create a LAN profile |
 | `updateLanProfile` | Update a LAN profile |
 | `updateFirewallSetting` | Update firewall settings |
+| `setIpsSetting` | Enable/disable and configure IDS/IPS (mode, detection level) on a site's gateway; can reduce max throughput when enabled |
 | `createFirewallAcl` | Create a firewall ACL rule |
 | `updateFirewallAcl` | Update a firewall ACL rule |
 | `deleteFirewallAcl` | Delete a firewall ACL rule |

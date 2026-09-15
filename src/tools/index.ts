@@ -52,6 +52,7 @@ import { registerReconnectClientTool } from './reconnectClient.js';
 import { registerSearchDevicesTool } from './searchDevices.js';
 import { registerSetDeviceLedTool } from './setDeviceLed.js';
 import { registerSetGatewayWanConnectTool } from './setGatewayWanConnect.js';
+import { registerSetIpsSettingTool } from './setIpsSetting.js';
 import { registerSetSsidEnableTool } from './setSsidEnable.js';
 import { registerSetSwitchNetworksTool } from './setSwitchNetworks.js';
 import { registerSetSwitchPortNameTool } from './setSwitchPortName.js';
@@ -112,6 +113,7 @@ export function registerAllTools(server: McpServer, client: OmadaClient): void {
     registerCreateLanProfileTool(server, client);
     registerUpdateLanProfileTool(server, client);
     registerUpdateFirewallSettingTool(server, client);
+    registerSetIpsSettingTool(server, client);
     registerCreateFirewallAclTool(server, client);
     registerUpdateFirewallAclTool(server, client);
     registerDeleteFirewallAclTool(server, client);

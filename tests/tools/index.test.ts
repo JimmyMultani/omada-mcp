@@ -59,6 +59,7 @@ describe('tools/index', () => {
                 'createLanProfile',
                 'updateLanProfile',
                 'updateFirewallSetting',
+                'setIpsSetting',
                 'createFirewallAcl',
                 'updateFirewallAcl',
                 'deleteFirewallAcl',
