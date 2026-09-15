@@ -409,6 +409,39 @@ describe('NetworkOperations', () => {
                 'filters.timeEnd': 1_600_100_000_000,
             });
         });
+
+        it('should include filters.module when a module filter is provided', async () => {
+            const mockResponse: OmadaApiResponse<PaginatedResult<unknown>> = {
+                errorCode: 0,
+                result: { data: [], totalRows: 0, currentPage: 1, currentSize: 10 },
+            };
+
+            vi.mocked(mockRequest.get).mockResolvedValue(mockResponse);
+
+            await networkOps.listEvents('site-123', 1, 10, 1_600_000_000_000, 1_600_100_000_000, 'Client');
+
+            expect(mockRequest.get).toHaveBeenCalledWith('/openapi/v1/test-omadac/sites/site-123/logs/events', {
+                page: 1,
+                pageSize: 10,
+                'filters.timeStart': 1_600_000_000_000,
+                'filters.timeEnd': 1_600_100_000_000,
+                'filters.module': 'Client',
+            });
+        });
+
+        it('should omit filters.module when no module filter is provided', async () => {
+            const mockResponse: OmadaApiResponse<PaginatedResult<unknown>> = {
+                errorCode: 0,
+                result: { data: [], totalRows: 0, currentPage: 1, currentSize: 10 },
+            };
+
+            vi.mocked(mockRequest.get).mockResolvedValue(mockResponse);
+
+            await networkOps.listEvents('site-123', 1, 10, 1_600_000_000_000, 1_600_100_000_000);
+
+            const params = vi.mocked(mockRequest.get).mock.calls[0][1] as Record<string, unknown>;
+            expect(params).not.toHaveProperty('filters.module');
+        });
     });
 
     describe('listLogs', () => {

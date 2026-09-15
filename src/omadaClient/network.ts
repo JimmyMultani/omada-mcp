@@ -331,17 +331,28 @@ export class NetworkOperations {
      * by the API; default to the last 7 days when not supplied, matching the default window the
      * sibling `audit-logs` endpoint applies internally when its own time filter is omitted.
      */
-    public async listEvents(siteId?: string, page = 1, pageSize = 10, timeStart?: number, timeEnd?: number): Promise<PaginatedResult<unknown>> {
+    public async listEvents(
+        siteId?: string,
+        page = 1,
+        pageSize = 10,
+        timeStart?: number,
+        timeEnd?: number,
+        module?: 'System' | 'Device' | 'Client'
+    ): Promise<PaginatedResult<unknown>> {
         const resolvedSiteId = this.site.resolveSiteId(siteId);
         const resolvedTimeEnd = timeEnd ?? Date.now();
         const resolvedTimeStart = timeStart ?? resolvedTimeEnd - 7 * 24 * 60 * 60 * 1000;
         const path = this.buildPath(`/sites/${encodeURIComponent(resolvedSiteId)}/logs/events`);
-        const response = await this.request.get<OmadaApiResponse<PaginatedResult<unknown>>>(path, {
+        const params: Record<string, unknown> = {
             page,
             pageSize,
             'filters.timeStart': resolvedTimeStart,
             'filters.timeEnd': resolvedTimeEnd,
-        });
+        };
+        if (module !== undefined) {
+            params['filters.module'] = module;
+        }
+        const response = await this.request.get<OmadaApiResponse<PaginatedResult<unknown>>>(path, params);
         return this.request.ensureSuccess(response);
     }
 
