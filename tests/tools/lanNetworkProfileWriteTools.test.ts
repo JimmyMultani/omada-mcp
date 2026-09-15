@@ -11,7 +11,8 @@ describe('LAN Network and Profile Write Tools', () => {
                 gatewaySubnet: '192.168.20.1/24',
                 purpose: 1,
                 igmpSnoopEnable: false,
-                dhcpSettings: { enable: true, ipRangeStart: '192.168.20.100', ipRangeEnd: '192.168.20.200', leaseTime: 86400 },
+                interfaceIds: ['2_e144ec2260ca4f3da50e7912b0b9947e'],
+                dhcpSettingsVO: { enable: true, ipRangePool: [{ ipaddrStart: '192.168.20.100', ipaddrEnd: '192.168.20.200' }], leasetime: 1440 },
             };
             const mockClient = { createLanNetwork: vi.fn().mockResolvedValue({}) };
             const mockServer = {
@@ -39,7 +40,8 @@ describe('LAN Network and Profile Write Tools', () => {
                 gatewaySubnet: '192.168.20.1/24',
                 purpose: 1,
                 igmpSnoopEnable: false,
-                dhcpSettings: { enable: true, ipRangeStart: '192.168.20.100', ipRangeEnd: '192.168.20.200', leaseTime: 86400 },
+                interfaceIds: ['2_e144ec2260ca4f3da50e7912b0b9947e'],
+                dhcpSettingsVO: { enable: true, ipRangePool: [{ ipaddrStart: '192.168.20.100', ipaddrEnd: '192.168.20.200' }], leasetime: 1440 },
             };
             const mockClient = { updateLanNetwork: vi.fn().mockResolvedValue({}) };
             const mockServer = {
