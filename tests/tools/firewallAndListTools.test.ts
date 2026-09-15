@@ -160,7 +160,7 @@ describe('Firewall, IP Group, Route, and Log List Tools', () => {
                 expect.objectContaining({ description: expect.any(String) }),
                 expect.any(Function)
             );
-            expect(mockClient.listEvents).toHaveBeenCalledWith('test-site', 2, 25);
+            expect(mockClient.listEvents).toHaveBeenCalledWith('test-site', 2, 25, undefined, undefined);
         });
     });
 
