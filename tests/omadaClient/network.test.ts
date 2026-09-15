@@ -97,7 +97,7 @@ describe('NetworkOperations', () => {
 
             const result = await networkOps.getPortForwardingStatus('User', 'site-123', 1, 10);
 
-            expect(mockRequest.get).toHaveBeenCalledWith('/openapi/v1/test-omadac/sites/site-123/insight/port-forwarding/User', {
+            expect(mockRequest.get).toHaveBeenCalledWith('/openapi/v1/test-omadac/sites/site-123/insight/port-forwarding/user', {
                 page: 1,
                 pageSize: 10,
             });
@@ -120,7 +120,7 @@ describe('NetworkOperations', () => {
 
             const result = await networkOps.getPortForwardingStatus('UPnP', 'site-123');
 
-            expect(mockRequest.get).toHaveBeenCalledWith('/openapi/v1/test-omadac/sites/site-123/insight/port-forwarding/UPnP', {
+            expect(mockRequest.get).toHaveBeenCalledWith('/openapi/v1/test-omadac/sites/site-123/insight/port-forwarding/upnp', {
                 page: 1,
                 pageSize: 10,
             });
@@ -295,7 +295,7 @@ describe('NetworkOperations', () => {
 
             await networkOps.getPortForwardingStatus('UPnP', 'site-123', 1, 10);
 
-            expect(mockRequest.get).toHaveBeenCalledWith('/openapi/v1/test-omadac/sites/site-123/insight/port-forwarding/UPnP', {
+            expect(mockRequest.get).toHaveBeenCalledWith('/openapi/v1/test-omadac/sites/site-123/insight/port-forwarding/upnp', {
                 page: 1,
                 pageSize: 10,
             });

@@ -273,10 +273,6 @@ export class OmadaClient {
     }
 
     // Network read/write operations (switch ports, firewall ACLs, routes)
-    public async getSwitchPorts(switchMac: string, siteId?: string): Promise<unknown[]> {
-        return await this.networkOps.getSwitchPorts(switchMac, siteId);
-    }
-
     public async updateSwitchPort(switchMac: string, portId: string, data: Record<string, unknown>, siteId?: string): Promise<unknown> {
         return await this.networkOps.updateSwitchPort(switchMac, portId, data, siteId);
     }
@@ -378,7 +374,7 @@ export class OmadaClient {
         return await this.switchOps.getCableTestResults(switchMac, siteId);
     }
 
-    public async getSwitchNetworks(switchMac: string, siteId?: string): Promise<unknown> {
+    public async getSwitchNetworks(switchMac: string, siteId?: string): Promise<unknown[]> {
         return await this.switchOps.getSwitchNetworks(switchMac, siteId);
     }
 

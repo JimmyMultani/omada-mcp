@@ -31,7 +31,6 @@ import { registerGetSsidDetailTool } from './getSsidDetail.js';
 import { registerGetSsidListTool } from './getSsidList.js';
 import { registerGetSwitchTool } from './getSwitch.js';
 import { registerGetSwitchNetworksTool } from './getSwitchNetworks.js';
-import { registerGetSwitchPortsTool } from './getSwitchPorts.js';
 import { registerGetSwitchStackDetailTool } from './getSwitchStackDetail.js';
 import { registerGetThreatListTool } from './getThreatList.js';
 import { registerGetWlanGroupListTool } from './getWlanGroupList.js';
@@ -94,7 +93,6 @@ export function registerAllTools(server: McpServer, client: OmadaClient): void {
     registerGetSsidListTool(server, client);
     registerGetSsidDetailTool(server, client);
     registerGetFirewallSettingTool(server, client);
-    registerGetSwitchPortsTool(server, client);
     registerGetFirmwareDetailsTool(server, client);
     registerListEventsTool(server, client);
     registerListLogsTool(server, client);
