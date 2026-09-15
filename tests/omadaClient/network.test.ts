@@ -326,6 +326,43 @@ describe('NetworkOperations', () => {
         });
     });
 
+    describe('setIpsSetting', () => {
+        it('should PATCH the network-security/ips endpoint and report supported: true on success', async () => {
+            const mockResponse: OmadaApiResponse<unknown> = {
+                errorCode: 0,
+                result: {},
+            };
+            const data = { enable: false };
+
+            vi.mocked(mockRequest.request).mockResolvedValue(mockResponse);
+
+            const result = await networkOps.setIpsSetting(data, 'site-123');
+
+            expect(mockRequest.request).toHaveBeenCalledWith({
+                method: 'PATCH',
+                url: '/openapi/v1/test-omadac/sites/site-123/network-security/ips',
+                data,
+            });
+            expect(result).toEqual({ supported: true });
+        });
+
+        it('should report supported: false instead of throwing when the gateway rejects enabling IDS/IPS', async () => {
+            const mockResponse: OmadaApiResponse<unknown> = {
+                errorCode: -35205,
+                msg: 'The adopted gateway does not support IDS/IPS configurations.',
+            };
+
+            vi.mocked(mockRequest.request).mockResolvedValue(mockResponse);
+
+            const result = await networkOps.setIpsSetting({ enable: true, mode: 'IDS', level: 'low' }, 'site-123');
+
+            expect(result).toEqual({
+                supported: false,
+                reason: 'The adopted gateway does not support IDS/IPS configurations.',
+            });
+        });
+    });
+
     describe('listEvents', () => {
         it('should fetch events from the logs/events endpoint with a default 7-day time range', async () => {
             const mockResult: PaginatedResult<unknown> = {

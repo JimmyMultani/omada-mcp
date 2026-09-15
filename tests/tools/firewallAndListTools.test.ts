@@ -84,6 +84,41 @@ describe('Firewall, IP Group, Route, and Log List Tools', () => {
         });
     });
 
+    describe('registerSetIpsSettingTool', () => {
+        it('should register the tool and assemble enable/mode/level/settings into one body', async () => {
+            const { registerSetIpsSettingTool } = await import('../../src/tools/setIpsSetting.js');
+
+            const mockClient = { setIpsSetting: vi.fn().mockResolvedValue({}) };
+            const mockServer = {
+                registerTool: vi.fn((_, _schema, handler) =>
+                    handler({ siteId: 'test-site', enable: true, mode: 'IDS', level: 'low', settings: { allowList: [] } }, {})
+                ),
+            };
+
+            registerSetIpsSettingTool(mockServer as never, mockClient as never);
+
+            expect(mockServer.registerTool).toHaveBeenCalledWith(
+                'setIpsSetting',
+                expect.objectContaining({ description: expect.any(String), annotations: { destructiveHint: true } }),
+                expect.any(Function)
+            );
+            expect(mockClient.setIpsSetting).toHaveBeenCalledWith({ enable: true, mode: 'IDS', level: 'low', allowList: [] }, 'test-site');
+        });
+
+        it('should omit mode/level when not provided', async () => {
+            const { registerSetIpsSettingTool } = await import('../../src/tools/setIpsSetting.js');
+
+            const mockClient = { setIpsSetting: vi.fn().mockResolvedValue({}) };
+            const mockServer = {
+                registerTool: vi.fn((_, _schema, handler) => handler({ siteId: 'test-site', enable: false }, {})),
+            };
+
+            registerSetIpsSettingTool(mockServer as never, mockClient as never);
+
+            expect(mockClient.setIpsSetting).toHaveBeenCalledWith({ enable: false }, 'test-site');
+        });
+    });
+
     describe('registerListFirewallAclsTool', () => {
         it('should register the tool and pass siteId through to the client', async () => {
             const { registerListFirewallAclsTool } = await import('../../src/tools/listFirewallAcls.js');

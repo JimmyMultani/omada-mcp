@@ -236,6 +236,33 @@ export class NetworkOperations {
     }
 
     /**
+     * Enable/disable and configure IDS/IPS (threat protection) for a site's gateway.
+     * OperationId: setIpsConfig. PATCH on the same resource getIpsSetting reads. Confirmed live:
+     * `{ enable: false }` succeeds (errorCode 0); `{ enable: true }` was rejected with
+     * IPS_UNSUPPORTED_ERROR_CODE on every gateway model available for testing (ER605 v2.0) even
+     * though getIpsSetting reports `supported: true` for it — so that model's read-side support
+     * flag doesn't reflect actual write support. `mode`/`level`/allow-list field names follow
+     * TP-Link's documented shape but are unverified against a live enabled-state response, since
+     * no available gateway would accept enabling. Same graceful handling as getIpsSetting applies
+     * here: report `{ supported: false, reason }` instead of throwing on that errorCode, since it's
+     * a meaningful per-gateway-model answer rather than a request error.
+     */
+    public async setIpsSetting(data: Record<string, unknown>, siteId?: string): Promise<unknown> {
+        const resolvedSiteId = this.site.resolveSiteId(siteId);
+        const path = this.buildPath(`/sites/${encodeURIComponent(resolvedSiteId)}/network-security/ips`);
+        const response = await this.request.request<OmadaApiResponse<unknown>>({ method: 'PATCH', url: path, data });
+
+        if (response.errorCode === IPS_UNSUPPORTED_ERROR_CODE) {
+            return {
+                supported: false,
+                reason: response.msg ?? 'This gateway does not support IDS/IPS configuration.',
+            };
+        }
+
+        return { supported: true, ...(this.request.ensureSuccess(response) as Record<string, unknown>) };
+    }
+
+    /**
      * Create a new LAN network (v2 API).
      */
     public async createLanNetwork(data: Record<string, unknown>, siteId?: string): Promise<unknown> {
