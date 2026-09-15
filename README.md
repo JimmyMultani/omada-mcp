@@ -114,13 +114,12 @@ Available at `http://localhost:3000/mcp` (stream) or `http://localhost:3000/sse`
 | `getSsidList` | SSIDs in a WLAN group |
 | `getSsidDetail` | Detailed SSID configuration |
 | `getFirewallSetting` | Firewall rules and policies |
-| `getSwitchPorts` | All ports for a switch (status, PoE, speed, STP) |
 | `getFirmwareDetails` | Firmware info for a device |
 | `listEvents` | Paginated site events |
 | `listLogs` | Paginated site logs |
 | `listFirewallAcls` | Firewall ACL rules |
 | `listRoutes` | Static routes (internal web UI API only, requires `OMADA_WEB_USERNAME`/`OMADA_WEB_PASSWORD`) |
-| `getSwitch` | Full switch info including portList array |
+| `getSwitch` | Full switch info including portList array (per-port status, profile, PoE) |
 | `getCableTestResults` | Cable test results for a switch |
 | `getSwitchNetworks` | Switch VLAN trunking configuration |
 

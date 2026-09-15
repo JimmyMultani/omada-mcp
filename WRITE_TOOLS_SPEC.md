@@ -47,8 +47,9 @@ Add write/action tools to this existing MCP server. Follow the existing code pat
 13. **listLogs** — GET `/sites/{siteId}/logs` (v1, paginated)
 
 ### Switch Port Management (from tplink-omada-api reference)
-14. **getSwitchPorts** — GET `/sites/{siteId}/switches/{switchMac}/ports` (v1, paginated)
-    - Returns all ports with status, profile, PoE, link speed, STP state
+14. ~~**getSwitchPorts** — GET `/sites/{siteId}/switches/{switchMac}/ports` (v1, paginated)~~ — removed;
+    this path doesn't exist in the Open API (always 404s). Use **getSwitch**, whose response already
+    includes the same per-port data in its `portList` array.
 15. **updateSwitchPort** — PATCH `/sites/{siteId}/switches/{switchMac}/ports/{portId}` (v1)
     - Params: profileId, poe (enable/disable), bandwidthLimitMode, linkSpeed, duplex, spanningTreeEnable, portIsolationEnable, loopbackDetectEnable, lldpMedEnable
 

@@ -49,10 +49,10 @@ export class NetworkOperations {
      *
      * For 'User' rules, uses the internal web UI API (`/setting/transmission/portForwardings`)
      * when web credentials are configured — confirmed by capturing the controller's own web UI
-     * network traffic; the public Open API's documented `insight/port-forwarding` path returns
-     * "Invalid request parameters" on this controller (likely an Insight-feature gate rather than
-     * a real listing endpoint). 'UPnP' has no known internal-API equivalent yet, so it still uses
-     * the original (unverified) public path.
+     * network traffic. When falling back to the public Open API's `insight/port-forwarding` path
+     * (used always for 'UPnP', and for 'User' when no internal API is configured), the `type`
+     * path segment must be lowercase (`user`/`upnp`) — the enum values `User`/`UPnP` documented in
+     * the OpenAPI spec return "Invalid request parameters" (errorCode -1001) on this controller.
      *
      * @param type - Port forwarding type: 'User' or 'UPnP'
      * @param siteId - Optional site ID (uses default if not provided)
@@ -72,7 +72,7 @@ export class NetworkOperations {
             return this.internalRequest!.ensureSuccess(response);
         }
 
-        const path = this.buildPath(`/sites/${encodeURIComponent(resolvedSiteId)}/insight/port-forwarding/${encodeURIComponent(type)}`);
+        const path = this.buildPath(`/sites/${encodeURIComponent(resolvedSiteId)}/insight/port-forwarding/${encodeURIComponent(type.toLowerCase())}`);
 
         const response = await this.request.get<OmadaApiResponse<PaginatedResult<unknown>>>(path, {
             page,
@@ -293,15 +293,6 @@ export class NetworkOperations {
             pageSize,
         });
         return this.request.ensureSuccess(response);
-    }
-
-    /**
-     * Get switch ports for a specific switch (v1 API, paginated).
-     */
-    public async getSwitchPorts(switchMac: string, siteId?: string): Promise<unknown[]> {
-        const resolvedSiteId = this.site.resolveSiteId(siteId);
-        const path = this.buildPath(`/sites/${encodeURIComponent(resolvedSiteId)}/switches/${encodeURIComponent(switchMac)}/ports`);
-        return await this.request.fetchPaginated<unknown>(path);
     }
 
     /**
