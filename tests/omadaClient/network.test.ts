@@ -293,6 +293,27 @@ describe('NetworkOperations', () => {
         });
     });
 
+    describe('updateFirewallSetting', () => {
+        it('should PATCH the v1 firewall endpoint (PUT 405s per the Open API spec)', async () => {
+            const mockResponse: OmadaApiResponse<unknown> = {
+                errorCode: 0,
+                result: {},
+            };
+            const data = { sendRedirects: false };
+
+            vi.mocked(mockRequest.request).mockResolvedValue(mockResponse);
+
+            await networkOps.updateFirewallSetting(data, 'site-123');
+
+            expect(mockRequest.request).toHaveBeenCalledWith({
+                method: 'PATCH',
+                url: '/openapi/v1/test-omadac/sites/site-123/firewall',
+                data,
+            });
+            expect(mockRequest.put).not.toHaveBeenCalled();
+        });
+    });
+
     describe('getIpsSetting', () => {
         it('should fetch IDS/IPS config for a site and report supported: true', async () => {
             const mockData = { enable: false };
