@@ -316,11 +316,12 @@ export class NetworkOperations {
 
     /**
      * Update firewall settings for a site (v1 API).
+     * The Open API spec's `/firewall` path only exposes PATCH — PUT 405s.
      */
     public async updateFirewallSetting(data: Record<string, unknown>, siteId?: string): Promise<unknown> {
         const resolvedSiteId = this.site.resolveSiteId(siteId);
         const path = this.buildPath(`/sites/${encodeURIComponent(resolvedSiteId)}/firewall`);
-        const response = await this.request.put<OmadaApiResponse<unknown>>(path, data);
+        const response = await this.request.request<OmadaApiResponse<unknown>>({ method: 'PATCH', url: path, data });
         return this.request.ensureSuccess(response);
     }
 
