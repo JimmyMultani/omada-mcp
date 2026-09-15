@@ -42,6 +42,7 @@ describe('tools/index', () => {
                 'getSsidList',
                 'getSsidDetail',
                 'getFirewallSetting',
+                'getIpsSetting',
                 'getFirmwareDetails',
                 'listEvents',
                 'listLogs',

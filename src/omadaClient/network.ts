@@ -5,6 +5,9 @@ import type { InternalRequestHandler } from './internalRequest.js';
 import type { RequestHandler } from './request.js';
 import type { SiteOperations } from './site.js';
 
+/** errorCode returned by getIpsConfig on gateway models that don't support IDS/IPS at all. */
+const IPS_UNSUPPORTED_ERROR_CODE = -35205;
+
 /**
  * Network-related operations for the Omada API.
  * Covers internet, LAN, WLAN, firewall, and port forwarding configurations.
@@ -207,6 +210,29 @@ export class NetworkOperations {
         const path = this.buildPath(`/sites/${encodeURIComponent(resolvedSiteId)}/firewall`);
         const response = await this.request.get<OmadaApiResponse<unknown>>(path);
         return this.request.ensureSuccess(response);
+    }
+
+    /**
+     * Get IDS/IPS (threat protection) config for a site's gateway.
+     * OperationId: getIpsConfig. Public Open API — not internal-web-UI-only, unlike ACLs/IP groups.
+     * Not all gateway models support IDS/IPS; the controller signals that with errorCode -35205
+     * ("The adopted gateway does not support IDS/IPS configurations") instead of a generic failure.
+     * That's a meaningful, distinct answer for a network audit, so it's surfaced as
+     * `{ supported: false, reason }` here rather than thrown.
+     */
+    public async getIpsSetting(siteId?: string): Promise<unknown> {
+        const resolvedSiteId = this.site.resolveSiteId(siteId);
+        const path = this.buildPath(`/sites/${encodeURIComponent(resolvedSiteId)}/network-security/ips`);
+        const response = await this.request.get<OmadaApiResponse<unknown>>(path);
+
+        if (response.errorCode === IPS_UNSUPPORTED_ERROR_CODE) {
+            return {
+                supported: false,
+                reason: response.msg ?? 'This gateway does not support IDS/IPS configuration.',
+            };
+        }
+
+        return { supported: true, ...(this.request.ensureSuccess(response) as Record<string, unknown>) };
     }
 
     /**
