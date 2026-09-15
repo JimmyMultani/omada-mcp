@@ -24,6 +24,7 @@ import { registerGetDeviceTool } from './getDevice.js';
 import { registerGetFirewallSettingTool } from './getFirewallSetting.js';
 import { registerGetFirmwareDetailsTool } from './getFirmwareDetails.js';
 import { registerGetInternetInfoTool } from './getInternetInfo.js';
+import { registerGetIpsSettingTool } from './getIpsSetting.js';
 import { registerGetLanNetworkListTool } from './getLanNetworkList.js';
 import { registerGetLanProfileListTool } from './getLanProfileList.js';
 import { registerGetPortForwardingStatusTool } from './getPortForwardingStatus.js';
@@ -93,6 +94,7 @@ export function registerAllTools(server: McpServer, client: OmadaClient): void {
     registerGetSsidListTool(server, client);
     registerGetSsidDetailTool(server, client);
     registerGetFirewallSettingTool(server, client);
+    registerGetIpsSettingTool(server, client);
     registerGetFirmwareDetailsTool(server, client);
     registerListEventsTool(server, client);
     registerListLogsTool(server, client);

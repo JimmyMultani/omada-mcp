@@ -190,6 +190,10 @@ export class OmadaClient {
         return await this.networkOps.getFirewallSetting(siteId);
     }
 
+    public async getIpsSetting(siteId?: string): Promise<unknown> {
+        return await this.networkOps.getIpsSetting(siteId);
+    }
+
     // Network write operations
     public async updateSsid(wlanId: string, ssidId: string, data: Record<string, unknown>, siteId?: string): Promise<unknown> {
         return await this.networkOps.updateSsid(wlanId, ssidId, data, siteId);

@@ -114,6 +114,7 @@ Available at `http://localhost:3000/mcp` (stream) or `http://localhost:3000/sse`
 | `getSsidList` | SSIDs in a WLAN group |
 | `getSsidDetail` | Detailed SSID configuration |
 | `getFirewallSetting` | Firewall rules and policies |
+| `getIpsSetting` | IDS/IPS (threat protection) status for a site's gateway — enabled/disabled, mode, and detection level; reports `supported: false` on gateway models without IDS/IPS |
 | `getFirmwareDetails` | Firmware info for a device |
 | `listEvents` | Paginated site events |
 | `listLogs` | Paginated site logs |
