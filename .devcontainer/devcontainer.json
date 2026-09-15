@@ -9,7 +9,7 @@
     "remoteUser": "node",
     "updateRemoteUserUID": true,
     "forwardPorts": [8043, 8088, 3000],
-    "postCreateCommand": "npm install -g npm && npm install",
+    "postCreateCommand": "corepack enable && yarn install",
     "customizations": {
         "vscode": {
             "settings": {

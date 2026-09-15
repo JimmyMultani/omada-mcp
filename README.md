@@ -184,19 +184,21 @@ Available at `http://localhost:3000/mcp` (stream) or `http://localhost:3000/sse`
 
 ## Development
 
+Requires Node 24 (see `.nvmrc`, use `nvm use`) and [Yarn 4](https://yarnpkg.com/) via Corepack (`corepack enable`).
+
 ```bash
-npm install
-npm run dev          # Live reload via tsx
-npm run build        # Compile TypeScript
-npm run check        # Lint + type check
-npm start            # Run compiled server (stdio)
+yarn install
+yarn dev          # Live reload via tsx
+yarn build        # Compile TypeScript
+yarn check        # Lint + type check
+yarn start        # Run compiled server (stdio)
 ```
 
 ### Docker
 
 ```bash
-npm run docker:build   # Build image
-npm run docker:run     # Run with .env file
+yarn docker:build   # Build image
+yarn docker:run     # Run with .env file
 ```
 
 ## Credits
