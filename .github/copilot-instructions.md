@@ -6,7 +6,7 @@ This project implements a Model Context Protocol (MCP) server that exposes TP-Li
 
 ## Tooling and Runtime
 
-- Node.js 24 (see `.nvmrc`; devcontainer base image `mcr.microsoft.com/devcontainers/javascript-node:24-bookworm`).
+- Node.js 24 (see `.nvmrc`).
 - Yarn 4 (Berry) via Corepack for package management — do not use `npm`.
 - TypeScript 5.9 with `module`/`moduleResolution` set to `NodeNext`.
 - Zod 3.x for configuration validation (the MCP SDK currently expects Zod 3 APIs).
@@ -135,6 +135,5 @@ Reference `.env.example`. Primary variables:
   - Supported Omada API Operations table
 - `README.Docker.md` should **not** include development-specific sections:
   - Development workflow (yarn commands, building, linting)
-  - Devcontainer support
   - Local testing and debugging
 - `README.Docker.md` should include a "Contributing" section with the GitHub repository URL to invite contributions.
