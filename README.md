@@ -149,6 +149,7 @@ Available at `http://localhost:3000/mcp` (stream) or `http://localhost:3000/sse`
 | `createPortForward` | Create a port forwarding rule (internal web UI API only) |
 | `updatePortForward` | Update a port forwarding rule by ID (internal web UI API only) |
 | `deletePortForward` | Delete a port forwarding rule by ID (internal web UI API only) |
+| `updateWanPortSetting` | Update a gateway WAN port's IPv4/IPv6/MAC connection settings (e.g. DHCP client `unicastDhcp`) |
 
 ### Switch Port Tools
 

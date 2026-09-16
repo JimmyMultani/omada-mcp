@@ -72,6 +72,7 @@ import { registerUpdatePortForwardTool } from './updatePortForward.js';
 import { registerUpdateRouteTool } from './updateRoute.js';
 import { registerUpdateSsidTool } from './updateSsid.js';
 import { registerUpdateSwitchPortTool } from './updateSwitchPort.js';
+import { registerUpdateWanPortSettingTool } from './updateWanPortSetting.js';
 
 export function registerAllTools(server: McpServer, client: OmadaClient): void {
     // Read tools
@@ -128,6 +129,7 @@ export function registerAllTools(server: McpServer, client: OmadaClient): void {
     registerCreatePortForwardTool(server, client);
     registerUpdatePortForwardTool(server, client);
     registerDeletePortForwardTool(server, client);
+    registerUpdateWanPortSettingTool(server, client);
 
     // Switch port tools
     registerSetSwitchPortProfileTool(server, client);

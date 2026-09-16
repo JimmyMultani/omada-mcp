@@ -74,6 +74,7 @@ describe('tools/index', () => {
                 'createPortForward',
                 'updatePortForward',
                 'deletePortForward',
+                'updateWanPortSetting',
                 // Switch port tools
                 'setSwitchPortProfile',
                 'setSwitchPortPoe',

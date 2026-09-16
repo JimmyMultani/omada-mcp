@@ -314,6 +314,31 @@ describe('NetworkOperations', () => {
         });
     });
 
+    describe('updateWanPortSetting', () => {
+        it('should PATCH the v1 wan port-setting endpoint, wrapping the port object in a type-0 envelope', async () => {
+            const mockResponse: OmadaApiResponse<unknown> = {
+                errorCode: 0,
+                result: {},
+            };
+            const portSetting = {
+                portId: '1_e98d1ea14d7c401591fdfcf431e5c348',
+                wanPortIpv4Setting: { protoType: 1, vlanId: 0, ipv4Dhcp: { unicastDhcp: true, mtu: 1500 } },
+                wanPortIpv6Setting: {},
+                wanPortMacSetting: {},
+            };
+
+            vi.mocked(mockRequest.request).mockResolvedValue(mockResponse);
+
+            await networkOps.updateWanPortSetting(portSetting, 'site-123');
+
+            expect(mockRequest.request).toHaveBeenCalledWith({
+                method: 'PATCH',
+                url: '/openapi/v1/test-omadac/sites/site-123/wan/networks/port-setting',
+                data: { type: 0, wanPortSetting: portSetting },
+            });
+        });
+    });
+
     describe('getIpsSetting', () => {
         it('should fetch IDS/IPS config for a site and report supported: true', async () => {
             const mockData = { enable: false };
