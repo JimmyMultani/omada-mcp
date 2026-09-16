@@ -231,6 +231,10 @@ export class OmadaClient {
         return await this.networkOps.setIpsSetting(data, siteId);
     }
 
+    public async updateWanPortSetting(portSetting: Record<string, unknown>, siteId?: string): Promise<unknown> {
+        return await this.networkOps.updateWanPortSetting(portSetting, siteId);
+    }
+
     public async listEvents(
         siteId?: string,
         page?: number,

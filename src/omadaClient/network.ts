@@ -326,6 +326,26 @@ export class NetworkOperations {
     }
 
     /**
+     * Update a gateway WAN port's connection settings (v1 API).
+     * OperationId: modifyWanPortSettings. `portSetting` must be the full per-port object —
+     * same shape as one entry in getInternetInfo's `wanPortSettings` array — since portId,
+     * wanPortIpv4Setting, wanPortIpv6Setting, and wanPortMacSetting are all required together
+     * by the controller (confirmed via the Open API spec's WanPortSettingOpenApiVO schema).
+     * `type` is hardcoded to 0 (WAN); this method doesn't cover the sibling USB/LTE port types
+     * the same endpoint also accepts, since none of this tool's callers manage those.
+     */
+    public async updateWanPortSetting(portSetting: Record<string, unknown>, siteId?: string): Promise<unknown> {
+        const resolvedSiteId = this.site.resolveSiteId(siteId);
+        const path = this.buildPath(`/sites/${encodeURIComponent(resolvedSiteId)}/wan/networks/port-setting`);
+        const response = await this.request.request<OmadaApiResponse<unknown>>({
+            method: 'PATCH',
+            url: path,
+            data: { type: 0, wanPortSetting: portSetting },
+        });
+        return this.request.ensureSuccess(response);
+    }
+
+    /**
      * Get paginated events for a site (v1 API).
      * The Open API spec's path is `/sites/{siteId}/logs/events`, not `/sites/{siteId}/events`
      * — the latter 404s. `filters.timeStart`/`filters.timeEnd` (epoch milliseconds) are required

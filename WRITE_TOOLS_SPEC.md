@@ -67,6 +67,9 @@ Add write/action tools to this existing MCP server. Follow the existing code pat
 ### Gateway WAN Management
 21. **setGatewayWanConnect** — POST `/sites/{siteId}/gateways/{gatewayMac}/wan/{portId}/connect` or `/disconnect` (v1)
     - Params: gatewayMac, portId, action (connect/disconnect)
+26. **updateWanPortSetting** — PATCH `/sites/{siteId}/wan/networks/port-setting` (v1)
+    - Params: portSetting — full per-port object (portId, wanPortIpv4Setting, wanPortIpv6Setting, wanPortMacSetting),
+      same shape as one entry in getInternetInfo's `wanPortSettings` array. Sent wrapped as `{ type: 0, wanPortSetting }`.
 
 ### Firewall ACL Rules
 22. **listFirewallAcls** — GET `/sites/{siteId}/setting/firewall/acls` (v1) 

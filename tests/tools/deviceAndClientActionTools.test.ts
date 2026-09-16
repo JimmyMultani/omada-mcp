@@ -183,6 +183,32 @@ describe('Device and Client Action Tools', () => {
         });
     });
 
+    describe('registerUpdateWanPortSettingTool', () => {
+        it('should register the tool and pass the port setting object through to the client', async () => {
+            const { registerUpdateWanPortSettingTool } = await import('../../src/tools/updateWanPortSetting.js');
+
+            const portSetting = {
+                portId: 'wan-1',
+                wanPortIpv4Setting: { protoType: 1, vlanId: 0, ipv4Dhcp: { unicastDhcp: true, mtu: 1500 } },
+                wanPortIpv6Setting: {},
+                wanPortMacSetting: {},
+            };
+            const mockClient = { updateWanPortSetting: vi.fn().mockResolvedValue({}) };
+            const mockServer = {
+                registerTool: vi.fn((_, _schema, handler) => handler({ siteId: 'test-site', portSetting }, {})),
+            };
+
+            registerUpdateWanPortSettingTool(mockServer as never, mockClient as never);
+
+            expect(mockServer.registerTool).toHaveBeenCalledWith(
+                'updateWanPortSetting',
+                expect.objectContaining({ description: expect.any(String) }),
+                expect.any(Function)
+            );
+            expect(mockClient.updateWanPortSetting).toHaveBeenCalledWith(portSetting, 'test-site');
+        });
+    });
+
     describe('registerUpdateClientTool', () => {
         it('should register the tool and pass clientMac and update data through to the client', async () => {
             const { registerUpdateClientTool } = await import('../../src/tools/updateClient.js');
