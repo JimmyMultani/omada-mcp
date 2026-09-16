@@ -2,6 +2,8 @@
 
 Full CRUD MCP server for TP-Link Omada SDN controllers. Exposes 70+ tools for reading, writing, and managing sites, devices, clients, networks, switch ports, firewalls, and more — all via the Model Context Protocol.
 
+Most of this codebase is written by AI (Claude Code), with human review and direction.
+
 ## Quick Start
 
 ### Using with Claude Code / Claude Desktop (stdio)
@@ -205,7 +207,7 @@ yarn docker:run     # Run with .env file
 
 ## Credits
 
-Forked from [jmtvms/tplink-omada-mcp](https://github.com/jmtvms/tplink-omada-mcp). Extended with full CRUD operations, switch port management, batch operations, and cable testing by [realtydev/omada-mcp](https://github.com/realtydev/omada-mcp).
+Originally forked from [jmtvms/tplink-omada-mcp](https://github.com/jmtvms/tplink-omada-mcp). This project has since diverged significantly (full CRUD operations, switch port management, batch operations, cable testing, and more) and is now maintained independently rather than as an active fork.
 
 ## License
 
