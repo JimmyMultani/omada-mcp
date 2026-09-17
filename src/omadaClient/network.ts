@@ -327,10 +327,33 @@ export class NetworkOperations {
 
     /**
      * Update a gateway WAN port's connection settings (v1 API).
-     * OperationId: modifyWanPortSettings. `portSetting` must be the full per-port object —
-     * same shape as one entry in getInternetInfo's `wanPortSettings` array — since portId,
-     * wanPortIpv4Setting, wanPortIpv6Setting, and wanPortMacSetting are all required together
-     * by the controller (confirmed via the Open API spec's WanPortSettingOpenApiVO schema).
+     * OperationId: modifyWanPortSettings. Despite the Open API spec naming this request body
+     * WanPortSettingOpenApiVO — suggesting it mirrors getInternetInfo's `wanPortSettings` read
+     * shape — the controller's actual validator rejects that shape outright. Confirmed by
+     * capturing the web UI's own request: field names differ (`portUuid` not `portId`, `proto`
+     * not `protoType`, `wanPortIpv4Setting.ipv4Dhcp.unicast: "on"/"off"` not `unicastDhcp: bool`,
+     * `wanPortMacSetting.method: "recover"` not a numeric enum, `wanPortIpv6Setting.enable: 0/1`
+     * not a bool), and only the *active* protocol's sub-object (e.g. `ipv4Dhcp` for `proto:
+     * "dhcp"`) should be present — omit the others entirely rather than sending them as `{}`.
+     * Passing the read-model shape through unchanged produces ~50 unrelated validation errors
+     * naming fields (`mssClampingType`, `subnetMask`, `userName`, `connectionMode`, etc.) that
+     * belong to the *other* unused protocol sub-objects, not the one being changed. Minimal
+     * working example for enabling unicast DHCP on WAN1:
+     * ```json
+     * {
+     *   "portDesc": "",
+     *   "portUuid": "1_e98d1ea14d7c401591fdfcf431e5c348",
+     *   "wanPortMacSetting": { "portUuid": "1_e98d1ea14d7c401591fdfcf431e5c348", "method": "recover" },
+     *   "wanPortIpv4Setting": {
+     *     "proto": "dhcp",
+     *     "ipv4Dhcp": { "unicast": "on", "mtu": 1500, "dhcpOptions": [] },
+     *     "vlanId": 0, "qosTagEnable": false, "portDesc": "",
+     *     "portUuid": "1_e98d1ea14d7c401591fdfcf431e5c348",
+     *     "supportQosTagEnable": true, "supportInternetVlan": true
+     *   },
+     *   "wanPortIpv6Setting": { "enable": 0, "portUuid": "1_e98d1ea14d7c401591fdfcf431e5c348" }
+     * }
+     * ```
      * `type` is hardcoded to 0 (WAN); this method doesn't cover the sibling USB/LTE port types
      * the same endpoint also accepts, since none of this tool's callers manage those.
      */
