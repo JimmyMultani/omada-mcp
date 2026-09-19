@@ -9,7 +9,14 @@ const setApRadioSchema = z.object({
     apMac: z.string().min(1, 'apMac is required').describe('AP MAC address, like AA-BB-CC-DD-EE-FF'),
     band: z.enum(['2g', '5g', '5g2', '6g']).describe('Radio band to change: 2g, 5g (single 5 GHz radio, or 5GHz-1), 5g2 (second 5 GHz radio) or 6g'),
     radioEnable: z.boolean().optional().describe('Enable or disable this radio'),
-    channel: z.number().int().min(0).optional().describe("Channel index, 0 = auto. Must be one of the AP's available channels"),
+    channel: z
+        .number()
+        .int()
+        .min(0)
+        .optional()
+        .describe(
+            "Channel INDEX, not the channel number: 0 = auto, otherwise the index from the AP's available channels (e.g. index 1 is channel 36 on a 5 GHz radio). Unavailable indexes are rejected with the valid list"
+        ),
     channelWidth: z
         .number()
         .int()
@@ -24,6 +31,7 @@ const setApRadioSchema = z.object({
         .positive()
         .optional()
         .describe('Tx power in dBm; applies with txPowerLevel 3 (custom), which is set implicitly when txPowerLevel is omitted'),
+    dryRun: z.boolean().optional().default(false).describe('Return the diff and the exact PATCH body without writing anything (default: false)'),
 });
 
 export function registerSetApRadioTool(server: McpServer, client: OmadaClient): void {
@@ -31,16 +39,17 @@ export function registerSetApRadioTool(server: McpServer, client: OmadaClient): 
         'setApRadio',
         {
             description:
-                'Change one radio band of an AP: enable/disable, channel, channel width, tx power. Only the supplied fields are sent. ' +
-                'This changes live wireless configuration and can drop every client on that band while the radio reconfigures. ' +
-                'Use getApRadios first to read the current values. Whether omitted fields keep their current value is not specified by the Open API.',
+                'Change one radio band of an AP: enable/disable, channel index, channel width, tx power. Changes live wireless configuration and ' +
+                'can drop every client on that band while the radio reconfigures. It reads the current band, sends the complete band with your ' +
+                'changes applied, re-reads it, and returns a before/after diff; if the controller answers success but a requested value did not ' +
+                'take (e.g. a tx power outside what the AP or region allows) it fails with the value the controller kept. Use dryRun to preview.',
             inputSchema: setApRadioSchema.shape,
             annotations: {
                 destructiveHint: true,
             },
         },
-        wrapToolHandler('setApRadio', async ({ apMac, band, siteId, ...settings }) =>
-            toToolResult(await client.setApRadio(apMac, band, settings, siteId))
+        wrapToolHandler('setApRadio', async ({ apMac, band, siteId, dryRun, ...settings }) =>
+            toToolResult(await client.setApRadio(apMac, band, settings, siteId, dryRun))
         )
     );
 }

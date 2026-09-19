@@ -238,7 +238,7 @@ describe('Device and Client Action Tools', () => {
             const mockClient = { setApRadio: vi.fn().mockResolvedValue({}) };
             const mockServer = {
                 registerTool: vi.fn((_, _schema, handler) =>
-                    handler({ apMac: 'AA-BB-CC-DD-EE-FF', band: '5g', siteId: 'test-site', channel: 36, channelWidth: 5 }, {})
+                    handler({ apMac: 'AA-BB-CC-DD-EE-FF', band: '5g', siteId: 'test-site', channel: 1, channelWidth: 5, dryRun: true }, {})
                 ),
             };
 
@@ -249,7 +249,7 @@ describe('Device and Client Action Tools', () => {
                 expect.objectContaining({ description: expect.any(String), annotations: { destructiveHint: true } }),
                 expect.any(Function)
             );
-            expect(mockClient.setApRadio).toHaveBeenCalledWith('AA-BB-CC-DD-EE-FF', '5g', { channel: 36, channelWidth: 5 }, 'test-site');
+            expect(mockClient.setApRadio).toHaveBeenCalledWith('AA-BB-CC-DD-EE-FF', '5g', { channel: 1, channelWidth: 5 }, 'test-site', true);
         });
     });
 

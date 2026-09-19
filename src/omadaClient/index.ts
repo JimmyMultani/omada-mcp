@@ -21,6 +21,7 @@ import type {
     OmadaSiteSummary,
     OswStackDetail,
     PaginatedResult,
+    SetApRadioResult,
     SetLogNotificationsOptions,
     SetLogNotificationsResult,
     ThreatInfo,
@@ -29,6 +30,7 @@ import type {
 import { logger } from '../utils/logger.js';
 
 import { ActionOperations } from './action.js';
+import { ApRadioOperations } from './apRadio.js';
 import { AuthManager } from './auth.js';
 import { ClientOperations } from './client.js';
 import { DeviceOperations } from './device.js';
@@ -73,6 +75,8 @@ export class OmadaClient {
 
     private readonly logNotificationOps: LogNotificationOperations;
 
+    private readonly apRadioOps: ApRadioOperations;
+
     private readonly omadacId: string;
 
     constructor(options: OmadaClientOptions) {
@@ -102,6 +106,7 @@ export class OmadaClient {
         this.securityOps = new SecurityOperations(this.request, this.buildOmadaPath.bind(this));
         this.networkOps = new NetworkOperations(this.request, this.siteOps, this.buildOmadaPath.bind(this));
         this.logNotificationOps = new LogNotificationOperations(this.request, this.siteOps, this.buildOmadaPath.bind(this));
+        this.apRadioOps = new ApRadioOperations(this.request, this.siteOps, this.buildOmadaPath.bind(this));
         this.actionOps = new ActionOperations(this.request, this.siteOps, this.buildOmadaPath.bind(this));
         this.genericOps = new GenericOperations(this.request, this.buildOmadaPath.bind(this));
         this.switchOps = new SwitchOperations(this.request, this.siteOps, this.buildOmadaPath.bind(this));
@@ -311,8 +316,14 @@ export class OmadaClient {
         return await this.actionOps.setDeviceLed(deviceMac, ledSetting, siteId);
     }
 
-    public async setApRadio(apMac: string, band: ApRadioBand, settings: ApRadioSettings, siteId?: string): Promise<unknown> {
-        return await this.actionOps.setApRadio(apMac, band, settings, siteId);
+    public async setApRadio(
+        apMac: string,
+        band: ApRadioBand,
+        settings: ApRadioSettings,
+        siteId?: string,
+        dryRun?: boolean
+    ): Promise<SetApRadioResult> {
+        return await this.apRadioOps.setApRadio(apMac, band, settings, siteId, dryRun);
     }
 
     public async setLogNotifications(options: SetLogNotificationsOptions): Promise<SetLogNotificationsResult> {
