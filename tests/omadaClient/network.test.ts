@@ -490,6 +490,62 @@ describe('NetworkOperations', () => {
         });
     });
 
+    describe('listEvents key filters', () => {
+        const eventsPath = '/openapi/v1/test-omadac/sites/site-123/logs/events';
+        const event = (key: string) => ({ id: key, key });
+        const pageOf = (data: unknown[], totalRows: number): OmadaApiResponse<PaginatedResult<unknown>> => ({
+            errorCode: 0,
+            result: { data, totalRows, currentPage: 1, currentSize: data.length },
+        });
+
+        it('should keep only events whose key starts with keyPrefix, scanning at pageSize 1000', async () => {
+            vi.mocked(mockRequest.get).mockResolvedValue(pageOf([event('OSG_DHCP_S'), event('DEV_CONN'), event('DEV_DISCONN')], 3));
+
+            const result = await networkOps.listEvents('site-123', 1, 10, 1_600_000_000_000, 1_600_100_000_000, 'Device', 'DEV_');
+
+            expect(mockRequest.get).toHaveBeenCalledWith(eventsPath, {
+                page: 1,
+                pageSize: 1000,
+                'filters.timeStart': 1_600_000_000_000,
+                'filters.timeEnd': 1_600_100_000_000,
+                'filters.module': 'Device',
+            });
+            expect(result.data).toEqual([event('DEV_CONN'), event('DEV_DISCONN')]);
+            expect(result.totalRows).toBe(2);
+            expect(result).not.toHaveProperty('scanTruncated');
+        });
+
+        it('should drop events matching excludeKeyPrefix', async () => {
+            vi.mocked(mockRequest.get).mockResolvedValue(pageOf([event('OSG_DDNS'), event('AP_CH_C'), event('OSG_DHCP_C')], 3));
+
+            const result = await networkOps.listEvents('site-123', 1, 10, 1, 2, undefined, undefined, 'OSG_');
+
+            expect(result.data).toEqual([event('AP_CH_C')]);
+        });
+
+        it('should scan across server pages and paginate the matches', async () => {
+            vi.mocked(mockRequest.get)
+                .mockResolvedValueOnce(pageOf([event('DEV_A'), event('OSG_X')], 1500))
+                .mockResolvedValueOnce(pageOf([event('DEV_B'), event('DEV_C')], 1500));
+
+            const result = await networkOps.listEvents('site-123', 2, 2, 1, 2, undefined, 'DEV_');
+
+            expect(mockRequest.get).toHaveBeenCalledTimes(2);
+            expect(result.data).toEqual([event('DEV_C')]);
+            expect(result.totalRows).toBe(3);
+            expect(result.currentPage).toBe(2);
+        });
+
+        it('should flag scanTruncated when the scan page cap is reached', async () => {
+            vi.mocked(mockRequest.get).mockResolvedValue(pageOf([event('OSG_X')], 1_000_000));
+
+            const result = await networkOps.listEvents('site-123', 1, 10, 1, 2, undefined, 'DEV_');
+
+            expect(mockRequest.get).toHaveBeenCalledTimes(100);
+            expect(result.scanTruncated).toBe(true);
+        });
+    });
+
     describe('listAlerts', () => {
         const emptyResponse: OmadaApiResponse<PaginatedResult<unknown>> = {
             errorCode: 0,

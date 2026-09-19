@@ -241,9 +241,11 @@ export class OmadaClient {
         pageSize?: number,
         timeStart?: number,
         timeEnd?: number,
-        module?: 'System' | 'Device' | 'Client'
-    ): Promise<PaginatedResult<unknown>> {
-        return await this.networkOps.listEvents(siteId, page, pageSize, timeStart, timeEnd, module);
+        module?: 'System' | 'Device' | 'Client',
+        keyPrefix?: string,
+        excludeKeyPrefix?: string
+    ): Promise<PaginatedResult<unknown> & { scanTruncated?: boolean }> {
+        return await this.networkOps.listEvents(siteId, page, pageSize, timeStart, timeEnd, module, keyPrefix, excludeKeyPrefix);
     }
 
     public async listAlerts(

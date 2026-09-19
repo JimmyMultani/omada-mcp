@@ -119,7 +119,7 @@ Available at `http://localhost:3000/mcp` (stream) or `http://localhost:3000/sse`
 | `getIpsSetting` | IDS/IPS (threat protection) status for a site's gateway — enabled/disabled, mode, and detection level; reports `supported: false` on gateway models without IDS/IPS |
 | `getFirmwareDetails` | Firmware info for a device |
 | `listAlerts` | Paginated site alerts, optionally filtered by module and resolved state |
-| `listEvents` | Paginated site events |
+| `listEvents` | Paginated site events, optionally filtered by module and event key prefix |
 | `listLogs` | Paginated site logs |
 | `listFirewallAcls` | Firewall ACL rules |
 | `listRoutes` | Static routes (internal web UI API only, requires `OMADA_WEB_USERNAME`/`OMADA_WEB_PASSWORD`) |
