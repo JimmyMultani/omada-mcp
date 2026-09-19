@@ -7,6 +7,8 @@ import type { SiteOperations } from './site.js';
 
 /** errorCode returned by getIpsConfig on gateway models that don't support IDS/IPS at all. */
 const IPS_UNSUPPORTED_ERROR_CODE = -35205;
+const EVENT_SCAN_PAGE_SIZE = 1000;
+const EVENT_SCAN_MAX_PAGES = 100;
 
 /**
  * Network-related operations for the Omada API.
@@ -374,6 +376,10 @@ export class NetworkOperations {
      * — the latter 404s. `filters.timeStart`/`filters.timeEnd` (epoch milliseconds) are required
      * by the API; default to the last 7 days when not supplied, matching the default window the
      * sibling `audit-logs` endpoint applies internally when its own time filter is omitted.
+     *
+     * `keyPrefix`/`excludeKeyPrefix` filter on the event `key` (e.g. `DEV_` or `OSG_`). The API has no
+     * such filter, so these scan up to EVENT_SCAN_MAX_PAGES server pages and paginate the matches;
+     * `scanTruncated` is set when the scan cap was hit before the whole time range was covered.
      */
     public async listEvents(
         siteId?: string,
@@ -381,8 +387,10 @@ export class NetworkOperations {
         pageSize = 10,
         timeStart?: number,
         timeEnd?: number,
-        module?: 'System' | 'Device' | 'Client'
-    ): Promise<PaginatedResult<unknown>> {
+        module?: 'System' | 'Device' | 'Client',
+        keyPrefix?: string,
+        excludeKeyPrefix?: string
+    ): Promise<PaginatedResult<unknown> & { scanTruncated?: boolean }> {
         const resolvedSiteId = this.site.resolveSiteId(siteId);
         const resolvedTimeEnd = timeEnd ?? Date.now();
         const resolvedTimeStart = timeStart ?? resolvedTimeEnd - 7 * 24 * 60 * 60 * 1000;
@@ -396,8 +404,37 @@ export class NetworkOperations {
         if (module !== undefined) {
             params['filters.module'] = module;
         }
-        const response = await this.request.get<OmadaApiResponse<PaginatedResult<unknown>>>(path, params);
-        return this.request.ensureSuccess(response);
+        if (keyPrefix === undefined && excludeKeyPrefix === undefined) {
+            const response = await this.request.get<OmadaApiResponse<PaginatedResult<unknown>>>(path, params);
+            return this.request.ensureSuccess(response);
+        }
+
+        // The API has no event-key filter, so scan server pages and filter client-side.
+        const matches: unknown[] = [];
+        let scanTruncated = false;
+        for (let scanPage = 1; ; scanPage++) {
+            const response = await this.request.get<OmadaApiResponse<PaginatedResult<{ key?: string }>>>(path, {
+                ...params,
+                page: scanPage,
+                pageSize: EVENT_SCAN_PAGE_SIZE,
+            });
+            const result = this.request.ensureSuccess(response);
+            for (const event of result.data ?? []) {
+                const key = event.key ?? '';
+                if ((keyPrefix === undefined || key.startsWith(keyPrefix)) && (excludeKeyPrefix === undefined || !key.startsWith(excludeKeyPrefix))) {
+                    matches.push(event);
+                }
+            }
+            if (scanPage * EVENT_SCAN_PAGE_SIZE >= (result.totalRows ?? 0)) {
+                break;
+            }
+            if (scanPage >= EVENT_SCAN_MAX_PAGES) {
+                scanTruncated = true;
+                break;
+            }
+        }
+        const data = matches.slice((page - 1) * pageSize, page * pageSize);
+        return { data, totalRows: matches.length, currentPage: page, currentSize: data.length, ...(scanTruncated && { scanTruncated }) };
     }
 
     /**
