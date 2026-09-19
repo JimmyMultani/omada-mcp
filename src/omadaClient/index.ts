@@ -246,6 +246,18 @@ export class OmadaClient {
         return await this.networkOps.listEvents(siteId, page, pageSize, timeStart, timeEnd, module);
     }
 
+    public async listAlerts(
+        siteId?: string,
+        page?: number,
+        pageSize?: number,
+        timeStart?: number,
+        timeEnd?: number,
+        module?: 'System' | 'Device' | 'Client',
+        resolved?: boolean
+    ): Promise<PaginatedResult<unknown>> {
+        return await this.networkOps.listAlerts(siteId, page, pageSize, timeStart, timeEnd, module, resolved);
+    }
+
     public async listLogs(siteId?: string, page?: number, pageSize?: number): Promise<PaginatedResult<unknown>> {
         return await this.networkOps.listLogs(siteId, page, pageSize);
     }

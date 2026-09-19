@@ -212,6 +212,28 @@ describe('Firewall, IP Group, Route, and Log List Tools', () => {
         });
     });
 
+    describe('registerListAlertsTool', () => {
+        it('should register the tool and pass filters through to the client', async () => {
+            const { registerListAlertsTool } = await import('../../src/tools/listAlerts.js');
+
+            const mockClient = { listAlerts: vi.fn().mockResolvedValue([]) };
+            const mockServer = {
+                registerTool: vi.fn((_, _schema, handler) =>
+                    handler({ siteId: 'test-site', page: 2, pageSize: 25, module: 'Device', resolved: false }, {})
+                ),
+            };
+
+            registerListAlertsTool(mockServer as never, mockClient as never);
+
+            expect(mockServer.registerTool).toHaveBeenCalledWith(
+                'listAlerts',
+                expect.objectContaining({ description: expect.any(String) }),
+                expect.any(Function)
+            );
+            expect(mockClient.listAlerts).toHaveBeenCalledWith('test-site', 2, 25, undefined, undefined, 'Device', false);
+        });
+    });
+
     describe('registerListLogsTool', () => {
         it('should register the tool and pass pagination args through to the client', async () => {
             const { registerListLogsTool } = await import('../../src/tools/listLogs.js');
