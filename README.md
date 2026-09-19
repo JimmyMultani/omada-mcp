@@ -100,6 +100,8 @@ Available at `http://localhost:3000/mcp` (stream) or `http://localhost:3000/sse`
 | `listDevices` | List devices for a site |
 | `listClients` | List active clients for a site |
 | `getDevice` | Get details for a specific device |
+| `getApRadios` | AP radio configuration (channel, width, tx power per band) and radio statistics (retries, drops) |
+| `getClientHistory` | A client's association sessions over a time range, optionally with roams between APs |
 | `getClient` | Get details for a specific client |
 | `getSwitchStackDetail` | Get switch stack configuration and status |
 | `searchDevices` | Search devices globally across all sites |
