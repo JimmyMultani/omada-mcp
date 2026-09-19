@@ -21,6 +21,8 @@ import type {
     OmadaSiteSummary,
     OswStackDetail,
     PaginatedResult,
+    SetLogNotificationsOptions,
+    SetLogNotificationsResult,
     ThreatInfo,
 } from '../types/index.js';
 
@@ -33,6 +35,7 @@ import { DeviceOperations } from './device.js';
 import { GenericOperations } from './generic.js';
 import { InternalAuthManager } from './internalAuth.js';
 import { InternalRequestHandler } from './internalRequest.js';
+import { LogNotificationOperations } from './logNotification.js';
 import { NetworkOperations } from './network.js';
 import { RequestHandler } from './request.js';
 import { SecurityOperations } from './security.js';
@@ -68,6 +71,8 @@ export class OmadaClient {
 
     private readonly switchOps: SwitchOperations;
 
+    private readonly logNotificationOps: LogNotificationOperations;
+
     private readonly omadacId: string;
 
     constructor(options: OmadaClientOptions) {
@@ -96,6 +101,7 @@ export class OmadaClient {
         this.clientOps = new ClientOperations(this.request, this.siteOps, this.buildOmadaPath.bind(this));
         this.securityOps = new SecurityOperations(this.request, this.buildOmadaPath.bind(this));
         this.networkOps = new NetworkOperations(this.request, this.siteOps, this.buildOmadaPath.bind(this));
+        this.logNotificationOps = new LogNotificationOperations(this.request, this.siteOps, this.buildOmadaPath.bind(this));
         this.actionOps = new ActionOperations(this.request, this.siteOps, this.buildOmadaPath.bind(this));
         this.genericOps = new GenericOperations(this.request, this.buildOmadaPath.bind(this));
         this.switchOps = new SwitchOperations(this.request, this.siteOps, this.buildOmadaPath.bind(this));
@@ -307,6 +313,10 @@ export class OmadaClient {
 
     public async setApRadio(apMac: string, band: ApRadioBand, settings: ApRadioSettings, siteId?: string): Promise<unknown> {
         return await this.actionOps.setApRadio(apMac, band, settings, siteId);
+    }
+
+    public async setLogNotifications(options: SetLogNotificationsOptions): Promise<SetLogNotificationsResult> {
+        return await this.logNotificationOps.setLogNotifications(options);
     }
 
     public async getFirmwareDetails(deviceMac: string, siteId?: string): Promise<unknown> {

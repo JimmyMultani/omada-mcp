@@ -57,6 +57,7 @@ import { registerSetApRadioTool } from './setApRadio.js';
 import { registerSetDeviceLedTool } from './setDeviceLed.js';
 import { registerSetGatewayWanConnectTool } from './setGatewayWanConnect.js';
 import { registerSetIpsSettingTool } from './setIpsSetting.js';
+import { registerSetLogNotificationsTool } from './setLogNotifications.js';
 import { registerSetSsidEnableTool } from './setSsidEnable.js';
 import { registerSetSwitchNetworksTool } from './setSwitchNetworks.js';
 import { registerSetSwitchPortNameTool } from './setSwitchPortName.js';
@@ -158,6 +159,7 @@ export function registerAllTools(server: McpServer, client: OmadaClient): void {
     registerReconnectClientTool(server, client);
     registerSetDeviceLedTool(server, client);
     registerSetApRadioTool(server, client);
+    registerSetLogNotificationsTool(server, client);
     registerStartFirmwareUpgradeTool(server, client);
     registerSetGatewayWanConnectTool(server, client);
 

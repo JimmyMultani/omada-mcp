@@ -252,4 +252,23 @@ describe('Device and Client Action Tools', () => {
             expect(mockClient.setApRadio).toHaveBeenCalledWith('AA-BB-CC-DD-EE-FF', '5g', { channel: 36, channelWidth: 5 }, 'test-site');
         });
     });
+
+    describe('registerSetLogNotificationsTool', () => {
+        it('should register the tool and pass its options through to the client', async () => {
+            const { registerSetLogNotificationsTool } = await import('../../src/tools/setLogNotifications.js');
+
+            const mockClient = { setLogNotifications: vi.fn().mockResolvedValue({}) };
+            const args = { siteId: 'test-site', events: [{ key: 'W_C_ROAM', enable: true }], alerts: undefined, dryRun: true };
+            const mockServer = { registerTool: vi.fn((_, _schema, handler) => handler(args, {})) };
+
+            registerSetLogNotificationsTool(mockServer as never, mockClient as never);
+
+            expect(mockServer.registerTool).toHaveBeenCalledWith(
+                'setLogNotifications',
+                expect.objectContaining({ description: expect.any(String), annotations: { destructiveHint: true } }),
+                expect.any(Function)
+            );
+            expect(mockClient.setLogNotifications).toHaveBeenCalledWith(args);
+        });
+    });
 });
