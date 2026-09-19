@@ -230,4 +230,26 @@ describe('Device and Client Action Tools', () => {
             expect(mockClient.updateClient).toHaveBeenCalledWith('aa:bb:cc:dd:ee:ff', { name: 'Laptop', fixedIp: '192.168.1.50' }, 'test-site');
         });
     });
+
+    describe('registerSetApRadioTool', () => {
+        it('should register the tool and split band and site from the radio settings', async () => {
+            const { registerSetApRadioTool } = await import('../../src/tools/setApRadio.js');
+
+            const mockClient = { setApRadio: vi.fn().mockResolvedValue({}) };
+            const mockServer = {
+                registerTool: vi.fn((_, _schema, handler) =>
+                    handler({ apMac: 'AA-BB-CC-DD-EE-FF', band: '5g', siteId: 'test-site', channel: 36, channelWidth: 5 }, {})
+                ),
+            };
+
+            registerSetApRadioTool(mockServer as never, mockClient as never);
+
+            expect(mockServer.registerTool).toHaveBeenCalledWith(
+                'setApRadio',
+                expect.objectContaining({ description: expect.any(String), annotations: { destructiveHint: true } }),
+                expect.any(Function)
+            );
+            expect(mockClient.setApRadio).toHaveBeenCalledWith('AA-BB-CC-DD-EE-FF', '5g', { channel: 36, channelWidth: 5 }, 'test-site');
+        });
+    });
 });

@@ -51,6 +51,7 @@ import { registerListSitesTool } from './listSites.js';
 import { registerRebootDeviceTool } from './rebootDevice.js';
 import { registerReconnectClientTool } from './reconnectClient.js';
 import { registerSearchDevicesTool } from './searchDevices.js';
+import { registerSetApRadioTool } from './setApRadio.js';
 import { registerSetDeviceLedTool } from './setDeviceLed.js';
 import { registerSetGatewayWanConnectTool } from './setGatewayWanConnect.js';
 import { registerSetIpsSettingTool } from './setIpsSetting.js';
@@ -152,6 +153,7 @@ export function registerAllTools(server: McpServer, client: OmadaClient): void {
     registerUnblockClientTool(server, client);
     registerReconnectClientTool(server, client);
     registerSetDeviceLedTool(server, client);
+    registerSetApRadioTool(server, client);
     registerStartFirmwareUpgradeTool(server, client);
     registerSetGatewayWanConnectTool(server, client);
 

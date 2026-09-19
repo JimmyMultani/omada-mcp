@@ -5,6 +5,8 @@ import axios, { type AxiosInstance, type AxiosRequestConfig } from 'axios';
 import type { EnvironmentConfig } from '../config.js';
 import type {
     ActiveClientInfo,
+    ApRadioBand,
+    ApRadioSettings,
     ClientActivity,
     ClientPastConnection,
     GetClientActivityOptions,
@@ -291,6 +293,10 @@ export class OmadaClient {
 
     public async setDeviceLed(deviceMac: string, ledSetting: number, siteId?: string): Promise<unknown> {
         return await this.actionOps.setDeviceLed(deviceMac, ledSetting, siteId);
+    }
+
+    public async setApRadio(apMac: string, band: ApRadioBand, settings: ApRadioSettings, siteId?: string): Promise<unknown> {
+        return await this.actionOps.setApRadio(apMac, band, settings, siteId);
     }
 
     public async getFirmwareDetails(deviceMac: string, siteId?: string): Promise<unknown> {
