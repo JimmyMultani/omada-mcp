@@ -181,6 +181,7 @@ Available at `http://localhost:3000/mcp` (stream) or `http://localhost:3000/sse`
 | `unblockClient` | Unblock a client |
 | `reconnectClient` | Reconnect a client |
 | `setDeviceLed` | Set device LED setting |
+| `setLogNotifications` | Turn alert/event log notification types on or off for a site; dry run supported, returns a before/after diff (live config write) |
 | `setApRadio` | Change one AP radio band: enable, channel, width, tx power (can drop clients on that band) |
 | `startFirmwareUpgrade` | Start firmware upgrade |
 | `setGatewayWanConnect` | Connect/disconnect gateway WAN port |

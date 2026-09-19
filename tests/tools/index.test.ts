@@ -97,6 +97,7 @@ describe('tools/index', () => {
                 'reconnectClient',
                 'setDeviceLed',
                 'setApRadio',
+                'setLogNotifications',
                 'startFirmwareUpgrade',
                 'setGatewayWanConnect',
                 // Generic
