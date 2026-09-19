@@ -96,6 +96,7 @@ describe('tools/index', () => {
                 'unblockClient',
                 'reconnectClient',
                 'setDeviceLed',
+                'setApRadio',
                 'startFirmwareUpgrade',
                 'setGatewayWanConnect',
                 // Generic

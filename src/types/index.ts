@@ -1,4 +1,5 @@
 export type { ActiveClientInfo } from './activeClientInfo.js';
+export type { ApRadioBand, ApRadioSettings } from './apRadio.js';
 export type { ClientActivity, GetClientActivityOptions } from './clientActivity.js';
 export type { ClientHistory, ClientRoam, ClientSession, GetClientHistoryOptions } from './clientHistory.js';
 export type { ClientPastConnection, ListClientsPastConnectionsOptions } from './clientPastConnection.js';
