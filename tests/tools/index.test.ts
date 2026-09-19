@@ -44,6 +44,7 @@ describe('tools/index', () => {
                 'getFirewallSetting',
                 'getIpsSetting',
                 'getFirmwareDetails',
+                'listAlerts',
                 'listEvents',
                 'listLogs',
                 'listFirewallAcls',

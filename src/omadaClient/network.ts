@@ -416,6 +416,40 @@ export class NetworkOperations {
     }
 
     /**
+     * Get paginated alerts for a site (v1 API).
+     * Path is `/sites/{siteId}/logs/alerts`. Like `logs/events`, `filters.timeStart`/`filters.timeEnd`
+     * (epoch milliseconds) default to the last 7 days when not supplied.
+     */
+    public async listAlerts(
+        siteId?: string,
+        page = 1,
+        pageSize = 10,
+        timeStart?: number,
+        timeEnd?: number,
+        module?: 'System' | 'Device' | 'Client',
+        resolved?: boolean
+    ): Promise<PaginatedResult<unknown>> {
+        const resolvedSiteId = this.site.resolveSiteId(siteId);
+        const resolvedTimeEnd = timeEnd ?? Date.now();
+        const resolvedTimeStart = timeStart ?? resolvedTimeEnd - 7 * 24 * 60 * 60 * 1000;
+        const path = this.buildPath(`/sites/${encodeURIComponent(resolvedSiteId)}/logs/alerts`);
+        const params: Record<string, unknown> = {
+            page,
+            pageSize,
+            'filters.timeStart': resolvedTimeStart,
+            'filters.timeEnd': resolvedTimeEnd,
+        };
+        if (module !== undefined) {
+            params['filters.module'] = module;
+        }
+        if (resolved !== undefined) {
+            params['filters.resolved'] = resolved;
+        }
+        const response = await this.request.get<OmadaApiResponse<PaginatedResult<unknown>>>(path, params);
+        return this.request.ensureSuccess(response);
+    }
+
+    /**
      * Update a switch port configuration (v1 API).
      */
     public async updateSwitchPort(switchMac: string, portId: string, data: Record<string, unknown>, siteId?: string): Promise<unknown> {

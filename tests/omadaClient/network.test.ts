@@ -490,6 +490,55 @@ describe('NetworkOperations', () => {
         });
     });
 
+    describe('listAlerts', () => {
+        const emptyResponse: OmadaApiResponse<PaginatedResult<unknown>> = {
+            errorCode: 0,
+            result: { data: [], totalRows: 0, currentPage: 1, currentSize: 10 },
+        };
+
+        it('should fetch alerts from the logs/alerts endpoint with a default 7-day time range', async () => {
+            vi.mocked(mockRequest.get).mockResolvedValue(emptyResponse);
+            vi.spyOn(Date, 'now').mockReturnValue(1_700_000_000_000);
+
+            const result = await networkOps.listAlerts('site-123', 1, 10);
+
+            expect(mockRequest.get).toHaveBeenCalledWith('/openapi/v1/test-omadac/sites/site-123/logs/alerts', {
+                page: 1,
+                pageSize: 10,
+                'filters.timeStart': 1_700_000_000_000 - 7 * 24 * 60 * 60 * 1000,
+                'filters.timeEnd': 1_700_000_000_000,
+            });
+            expect(result).toEqual(emptyResponse.result);
+
+            vi.restoreAllMocks();
+        });
+
+        it('should include filters.module and filters.resolved when provided', async () => {
+            vi.mocked(mockRequest.get).mockResolvedValue(emptyResponse);
+
+            await networkOps.listAlerts('site-123', 1, 10, 1_600_000_000_000, 1_600_100_000_000, 'Device', false);
+
+            expect(mockRequest.get).toHaveBeenCalledWith('/openapi/v1/test-omadac/sites/site-123/logs/alerts', {
+                page: 1,
+                pageSize: 10,
+                'filters.timeStart': 1_600_000_000_000,
+                'filters.timeEnd': 1_600_100_000_000,
+                'filters.module': 'Device',
+                'filters.resolved': false,
+            });
+        });
+
+        it('should omit optional filters when not provided', async () => {
+            vi.mocked(mockRequest.get).mockResolvedValue(emptyResponse);
+
+            await networkOps.listAlerts('site-123', 1, 10, 1_600_000_000_000, 1_600_100_000_000);
+
+            const params = vi.mocked(mockRequest.get).mock.calls[0][1] as Record<string, unknown>;
+            expect(params).not.toHaveProperty('filters.module');
+            expect(params).not.toHaveProperty('filters.resolved');
+        });
+    });
+
     describe('listLogs', () => {
         it('should fetch audit logs from the audit-logs endpoint', async () => {
             const mockResult: PaginatedResult<unknown> = {
