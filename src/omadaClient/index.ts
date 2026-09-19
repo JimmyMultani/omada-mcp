@@ -6,8 +6,10 @@ import type { EnvironmentConfig } from '../config.js';
 import type {
     ActiveClientInfo,
     ClientActivity,
+    ClientHistory,
     ClientPastConnection,
     GetClientActivityOptions,
+    GetClientHistoryOptions,
     GetDeviceStatsOptions,
     GetThreatListOptions,
     ListClientsPastConnectionsOptions,
@@ -262,6 +264,14 @@ export class OmadaClient {
 
     public async listLogs(siteId?: string, page?: number, pageSize?: number): Promise<PaginatedResult<unknown>> {
         return await this.networkOps.listLogs(siteId, page, pageSize);
+    }
+
+    public async getApRadios(apMac: string, siteId?: string): Promise<{ radioConfig: unknown; radioStats: unknown }> {
+        return await this.deviceOps.getApRadios(apMac, siteId);
+    }
+
+    public async getClientHistory(options: GetClientHistoryOptions): Promise<ClientHistory> {
+        return await this.clientOps.getClientHistory(options);
     }
 
     // Device and client actions

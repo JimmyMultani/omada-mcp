@@ -26,6 +26,8 @@ describe('tools/index', () => {
                 'listDevices',
                 'listClients',
                 'getDevice',
+                'getApRadios',
+                'getClientHistory',
                 'getSwitchStackDetail',
                 'getClient',
                 'searchDevices',
