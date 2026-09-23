@@ -42,7 +42,7 @@ export function registerSetIpsSettingTool(server: McpServer, client: OmadaClient
                 'API shape but could not be verified against a live enabled-state response during development, since no ' +
                 'gateway available for testing would accept being enabled — pass extra fields via `settings` if the ' +
                 'documented names are rejected, and check the resulting error message for the field the controller expects.',
-            inputSchema: setIpsSettingSchema.shape,
+            inputSchema: setIpsSettingSchema.strict(),
             annotations: {
                 destructiveHint: true,
             },

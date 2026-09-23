@@ -22,7 +22,7 @@ export function registerUpdateFirewallAclTool(server: McpServer, client: OmadaCl
             description:
                 'Update an existing firewall ACL rule by its ID, without deleting and recreating it. ' +
                 'Use listFirewallAcls first to get the current rule shape and ID.',
-            inputSchema: updateFirewallAclSchema.shape,
+            inputSchema: updateFirewallAclSchema.strict(),
             annotations: {
                 destructiveHint: true,
             },

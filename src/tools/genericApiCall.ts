@@ -22,7 +22,7 @@ export function registerGenericApiCallTool(server: McpServer, client: OmadaClien
                 'Note: this only reaches the Open API — some settings (e.g. firewall ACLs, IP groups, static routes on ' +
                 'controllers like the OC200) are exposed solely through the internal web UI API and will 404 here; use the ' +
                 'dedicated tools (listFirewallAcls, createFirewallAcl, listIpGroups, etc.) for those instead.',
-            inputSchema: genericApiCallSchema.shape,
+            inputSchema: genericApiCallSchema.strict(),
             annotations: {
                 destructiveHint: true,
             },

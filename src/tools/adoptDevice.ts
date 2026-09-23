@@ -14,7 +14,7 @@ export function registerAdoptDeviceTool(server: McpServer, client: OmadaClient):
         'adoptDevice',
         {
             description: 'Adopt a pending device by its MAC address into the site.',
-            inputSchema: adoptDeviceSchema.shape,
+            inputSchema: adoptDeviceSchema.strict(),
             annotations: {
                 destructiveHint: true,
             },

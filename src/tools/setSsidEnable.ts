@@ -19,7 +19,7 @@ export function registerSetSsidEnableTool(server: McpServer, client: OmadaClient
                 "This is not part of the documented Open API — it was confirmed by capturing the controller's own web UI " +
                 'network traffic, since neither PUT/PATCH on the SSID resource itself nor its update-basic-config ' +
                 'sub-endpoint honors an ssidEnable field.',
-            inputSchema: setSsidEnableSchema.shape,
+            inputSchema: setSsidEnableSchema.strict(),
             annotations: {
                 destructiveHint: true,
             },

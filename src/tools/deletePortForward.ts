@@ -14,7 +14,7 @@ export function registerDeletePortForwardTool(server: McpServer, client: OmadaCl
         'deletePortForward',
         {
             description: 'Delete a port forwarding rule by its ID.',
-            inputSchema: deletePortForwardSchema.shape,
+            inputSchema: deletePortForwardSchema.strict(),
             annotations: {
                 destructiveHint: true,
             },

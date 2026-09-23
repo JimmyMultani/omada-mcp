@@ -21,7 +21,7 @@ export function registerCreateLanProfileTool(server: McpServer, client: OmadaCli
         'createLanProfile',
         {
             description: 'Create a new LAN profile with native/tagged network assignments and port settings.',
-            inputSchema: createLanProfileSchema.shape,
+            inputSchema: createLanProfileSchema.strict(),
             annotations: {
                 destructiveHint: true,
             },

@@ -22,7 +22,7 @@ export function registerCreatePortForwardTool(server: McpServer, client: OmadaCl
         'createPortForward',
         {
             description: 'Create a port forwarding rule for a site. Use getPortForwardingStatus(type: "User") first to see the expected rule shape.',
-            inputSchema: createPortForwardSchema.shape,
+            inputSchema: createPortForwardSchema.strict(),
             annotations: {
                 destructiveHint: true,
             },

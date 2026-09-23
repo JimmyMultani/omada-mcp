@@ -14,7 +14,7 @@ export function registerDeleteRouteTool(server: McpServer, client: OmadaClient):
         'deleteRoute',
         {
             description: 'Delete a static route by its ID.',
-            inputSchema: deleteRouteSchema.shape,
+            inputSchema: deleteRouteSchema.strict(),
             annotations: {
                 destructiveHint: true,
             },
