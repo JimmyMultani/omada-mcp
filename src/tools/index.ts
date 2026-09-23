@@ -30,6 +30,7 @@ import { registerGetIpsSettingTool } from './getIpsSetting.js';
 import { registerGetLanNetworkListTool } from './getLanNetworkList.js';
 import { registerGetLanProfileListTool } from './getLanProfileList.js';
 import { registerGetPortForwardingStatusTool } from './getPortForwardingStatus.js';
+import { registerGetServerInfoTool } from './getServerInfo.js';
 import { registerGetSsidDetailTool } from './getSsidDetail.js';
 import { registerGetSsidListTool } from './getSsidList.js';
 import { registerGetSwitchTool } from './getSwitch.js';
@@ -165,4 +166,5 @@ export function registerAllTools(server: McpServer, client: OmadaClient): void {
 
     // Generic escape hatch
     registerGenericApiCallTool(server, client);
+    registerGetServerInfoTool(server, client);
 }

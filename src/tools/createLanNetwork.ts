@@ -31,7 +31,7 @@ export function registerCreateLanNetworkTool(server: McpServer, client: OmadaCli
         'createLanNetwork',
         {
             description: 'Create a new LAN network with VLAN, gateway/subnet, and DHCP settings.',
-            inputSchema: createLanNetworkSchema.shape,
+            inputSchema: createLanNetworkSchema.strict(),
             annotations: {
                 destructiveHint: true,
             },

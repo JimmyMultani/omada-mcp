@@ -20,7 +20,7 @@ export function registerUpdateRouteTool(server: McpServer, client: OmadaClient):
         'updateRoute',
         {
             description: 'Update an existing static route by its ID. Use listRoutes first to see the expected route shape.',
-            inputSchema: updateRouteSchema.shape,
+            inputSchema: updateRouteSchema.strict(),
             annotations: {
                 destructiveHint: true,
             },

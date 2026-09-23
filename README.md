@@ -192,6 +192,12 @@ Available at `http://localhost:3000/mcp` (stream) or `http://localhost:3000/sse`
 |---|---|
 | `genericApiCall` | Invoke any Omada OpenAPI endpoint directly |
 
+### Meta
+
+| Tool | Description |
+|---|---|
+| `getServerInfo` | Report the package version, git commit, and build time this server process was actually built from |
+
 ## Development
 
 Requires Node 24 (see `.nvmrc`, use `nvm use`) and [Yarn 4](https://yarnpkg.com/) via Corepack (`corepack enable`).
@@ -210,6 +216,20 @@ yarn start        # Run compiled server (stdio)
 yarn docker:build   # Build image
 yarn docker:run     # Run with .env file
 ```
+
+### Restarting after a change
+
+For stdio transport, each session's MCP client spawns its own server subprocess when it connects,
+and that process keeps running whatever code it loaded at that point. Rebuilding `dist/` on disk
+(`yarn build`) does **not** affect an already-connected session — only a fresh connection picks up
+the new build. After merging a change and rebuilding:
+
+1. Restart/reconnect each MCP session that talks to this server (e.g. `/mcp` in Claude Code, or
+   start a new session).
+2. Call the `getServerInfo` tool and check `gitCommit` against the commit you expect to be running,
+   before relying on any new or changed tool behavior — especially anything billed as dry-run or
+   safe-by-default. A session that skips this can silently keep running stale code that ignores a
+   safety parameter it doesn't know about yet.
 
 ## Credits
 

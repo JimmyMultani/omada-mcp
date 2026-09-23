@@ -102,6 +102,8 @@ describe('tools/index', () => {
                 'setGatewayWanConnect',
                 // Generic
                 'genericApiCall',
+                // Meta
+                'getServerInfo',
             ];
 
             for (const tool of expectedTools) {

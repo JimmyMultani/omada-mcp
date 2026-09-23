@@ -27,3 +27,6 @@ coverage/
 !.yarn/sdks
 !.yarn/versions
 .pnp.*
+
+# Generated at build time by scripts/generate-build-info.mjs
+src/generated/

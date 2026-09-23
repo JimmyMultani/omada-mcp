@@ -43,7 +43,7 @@ export function registerSetApRadioTool(server: McpServer, client: OmadaClient): 
                 'can drop every client on that band while the radio reconfigures. It reads the current band, sends the complete band with your ' +
                 'changes applied, re-reads it, and returns a before/after diff; if the controller answers success but a requested value did not ' +
                 'take (e.g. a tx power outside what the AP or region allows) it fails with the value the controller kept. Use dryRun to preview.',
-            inputSchema: setApRadioSchema.shape,
+            inputSchema: setApRadioSchema.strict(),
             annotations: {
                 destructiveHint: true,
             },

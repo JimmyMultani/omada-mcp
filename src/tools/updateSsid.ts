@@ -28,7 +28,7 @@ export function registerUpdateSsidTool(server: McpServer, client: OmadaClient): 
                 "Update an SSID's basic configuration (name, band, security, VLAN, PSK, PMF mode, 802.11r, etc). " +
                 'Requires wlanId (from getWlanGroupList) and ssidId (from getSsidList). To enable/disable the SSID, use ' +
                 'setSsidEnable instead — this tool does not support that.',
-            inputSchema: updateSsidSchema.shape,
+            inputSchema: updateSsidSchema.strict(),
             annotations: {
                 destructiveHint: true,
             },

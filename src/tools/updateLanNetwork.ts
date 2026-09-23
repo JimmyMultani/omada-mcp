@@ -35,7 +35,7 @@ export function registerUpdateLanNetworkTool(server: McpServer, client: OmadaCli
         'updateLanNetwork',
         {
             description: 'Update an existing LAN network configuration including VLAN, gateway/subnet, and DHCP settings.',
-            inputSchema: updateLanNetworkSchema.shape,
+            inputSchema: updateLanNetworkSchema.strict(),
             annotations: {
                 destructiveHint: true,
             },

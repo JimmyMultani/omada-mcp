@@ -14,7 +14,7 @@ export function registerBlockClientTool(server: McpServer, client: OmadaClient):
         'blockClient',
         {
             description: 'Block a client device by its MAC address, preventing it from accessing the network.',
-            inputSchema: blockClientSchema.shape,
+            inputSchema: blockClientSchema.strict(),
             annotations: {
                 destructiveHint: true,
             },

@@ -34,7 +34,7 @@ export function registerUpdateWanPortSettingTool(server: McpServer, client: Omad
                 "client's unicast-renewal flag). The write payload uses different field names than getInternetInfo's " +
                 'read model — see the portSetting parameter description for the exact shape and a working example. ' +
                 'Does not connect/disconnect the port (use setGatewayWanConnect for that).',
-            inputSchema: updateWanPortSettingSchema.shape,
+            inputSchema: updateWanPortSettingSchema.strict(),
             annotations: {
                 destructiveHint: true,
             },

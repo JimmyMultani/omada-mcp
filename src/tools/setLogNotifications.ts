@@ -33,7 +33,7 @@ export function registerSetLogNotificationsTool(server: McpServer, client: Omada
                 'configuration: it reads the current state, applies only the named keys, writes the full state back, re-reads it and reports ' +
                 'a before/after diff with a check that nothing else changed. Unknown keys are rejected before anything is sent. ' +
                 'Use dryRun first to preview the diff.',
-            inputSchema: setLogNotificationsSchema.shape,
+            inputSchema: setLogNotificationsSchema.strict(),
             annotations: {
                 destructiveHint: true,
             },

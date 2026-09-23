@@ -19,7 +19,7 @@ export function registerCreateRouteTool(server: McpServer, client: OmadaClient):
         'createRoute',
         {
             description: 'Create a static route for a site. Use listRoutes first to see the expected route shape.',
-            inputSchema: createRouteSchema.shape,
+            inputSchema: createRouteSchema.strict(),
             annotations: {
                 destructiveHint: true,
             },

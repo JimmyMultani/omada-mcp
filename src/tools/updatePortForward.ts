@@ -16,7 +16,7 @@ export function registerUpdatePortForwardTool(server: McpServer, client: OmadaCl
         {
             description:
                 'Update an existing port forwarding rule by its ID. Use getPortForwardingStatus(type: "User") first to see the expected rule shape.',
-            inputSchema: updatePortForwardSchema.shape,
+            inputSchema: updatePortForwardSchema.strict(),
             annotations: {
                 destructiveHint: true,
             },
