@@ -12,28 +12,8 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
-    outputs:
-      release_created: ${{ steps.release.outputs.release_created }}
-      tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
       - uses: googleapis/release-please-action@v4
-        id: release
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
-
-  trigger-docker-publish:
-    name: Trigger Docker publish for the new tag
-    needs: release-please
-    if: ${{ needs.release-please.outputs.release_created == 'true' }}
-    runs-on: ubuntu-latest
-    permissions:
-      actions: write
-    steps:
-      - name: Dispatch docker-publish.yml on ${{ needs.release-please.outputs.tag_name }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh workflow run docker-publish.yml \
-            --repo "${{ github.repository }}" \
-            --ref "${{ needs.release-please.outputs.tag_name }}"
