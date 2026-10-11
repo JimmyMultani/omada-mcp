@@ -29,6 +29,7 @@ import { registerGetInternetInfoTool } from './getInternetInfo.js';
 import { registerGetIpsSettingTool } from './getIpsSetting.js';
 import { registerGetLanNetworkListTool } from './getLanNetworkList.js';
 import { registerGetLanProfileListTool } from './getLanProfileList.js';
+import { registerGetPoeUsageTool } from './getPoeUsage.js';
 import { registerGetPortForwardingStatusTool } from './getPortForwardingStatus.js';
 import { registerGetServerInfoTool } from './getServerInfo.js';
 import { registerGetSsidDetailTool } from './getSsidDetail.js';
@@ -113,6 +114,7 @@ export function registerAllTools(server: McpServer, client: OmadaClient): void {
     registerListIpGroupsTool(server, client);
     registerListRoutesTool(server, client);
     registerGetSwitchTool(server, client);
+    registerGetPoeUsageTool(server, client);
     registerGetCableTestResultsTool(server, client);
     registerGetSwitchNetworksTool(server, client);
 

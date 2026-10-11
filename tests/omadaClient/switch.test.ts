@@ -63,6 +63,52 @@ describe('SwitchOperations', () => {
         });
     });
 
+    describe('getPoeUsage', () => {
+        it('fetches PoE usage from the v1 dashboard endpoint', async () => {
+            const mockUsage = [
+                {
+                    mac: 'D8-44-89-C3-00-04',
+                    name: 'Network Switch',
+                    portNum: 4,
+                    totalPowerUsed: 25,
+                    totalPercentUsed: 39.84,
+                    totalPower: 62,
+                    poePorts: [
+                        { portId: 1, poeSupported: true, poeEnabled: true, poePower: 7, poePercent: 23 },
+                        { portId: 2, poeSupported: true, poeEnabled: true, poePower: 6, poePercent: 20 },
+                        { portId: 3, poeSupported: true, poeEnabled: true, poePower: 4, poePercent: 13 },
+                        { portId: 4, poeSupported: true, poeEnabled: true, poePower: 7, poePercent: 23 },
+                        { portId: 5, poeSupported: false },
+                        { portId: 6, poeSupported: false },
+                        { portId: 7, poeSupported: false },
+                        { portId: 8, poeSupported: false },
+                    ],
+                },
+            ];
+            vi.mocked(mockRequest.get).mockResolvedValue({ errorCode: 0, result: mockUsage });
+
+            const result = await switchOps.getPoeUsage('site-123');
+
+            expect(mockRequest.get).toHaveBeenCalledWith('/openapi/v1/test-omadac/sites/site-123/dashboard/poe-usage');
+            expect(result).toEqual(mockUsage);
+        });
+
+        it('falls back to the default site and returns an empty list when result is missing', async () => {
+            vi.mocked(mockRequest.get).mockResolvedValue({ errorCode: 0 });
+
+            const result = await switchOps.getPoeUsage();
+
+            expect(mockRequest.get).toHaveBeenCalledWith('/openapi/v1/test-omadac/sites/default-site/dashboard/poe-usage');
+            expect(result).toEqual([]);
+        });
+
+        it('throws when the API returns an error', async () => {
+            vi.mocked(mockRequest.get).mockResolvedValue({ errorCode: -1, msg: 'Forbidden' });
+
+            await expect(switchOps.getPoeUsage('site-123')).rejects.toThrow('Forbidden');
+        });
+    });
+
     describe('setSwitchPortProfile', () => {
         it('sets a LAN profile on a single port', async () => {
             vi.mocked(mockRequest.put).mockResolvedValue({ errorCode: 0, result: {} });

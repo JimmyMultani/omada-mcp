@@ -261,6 +261,26 @@ describe('Switch Port Tools', () => {
         });
     });
 
+    describe('registerGetPoeUsageTool', () => {
+        it('should register the tool and pass siteId through to the client', async () => {
+            const { registerGetPoeUsageTool } = await import('../../src/tools/getPoeUsage.js');
+
+            const mockClient = { getPoeUsage: vi.fn().mockResolvedValue([]) };
+            const mockServer = {
+                registerTool: vi.fn((_, _schema, handler) => handler({ siteId: 'test-site' }, {})),
+            };
+
+            registerGetPoeUsageTool(mockServer as never, mockClient as never);
+
+            expect(mockServer.registerTool).toHaveBeenCalledWith(
+                'getPoeUsage',
+                expect.objectContaining({ description: expect.any(String) }),
+                expect.any(Function)
+            );
+            expect(mockClient.getPoeUsage).toHaveBeenCalledWith('test-site');
+        });
+    });
+
     describe('registerGetSwitchNetworksTool', () => {
         it('should register the tool and pass switchMac through to the client', async () => {
             const { registerGetSwitchNetworksTool } = await import('../../src/tools/getSwitchNetworks.js');

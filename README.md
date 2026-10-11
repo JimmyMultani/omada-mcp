@@ -126,6 +126,7 @@ Available at `http://localhost:3000/mcp` (stream) or `http://localhost:3000/sse`
 | `listFirewallAcls` | Firewall ACL rules |
 | `listRoutes` | Static routes (internal web UI API only, requires `OMADA_WEB_USERNAME`/`OMADA_WEB_PASSWORD`) |
 | `getSwitch` | Full switch info including portList array (per-port status, profile, PoE) |
+| `getPoeUsage` | Live PoE draw and budget per PoE switch, with per-port power (W) |
 | `getCableTestResults` | Cable test results for a switch |
 | `getSwitchNetworks` | Switch VLAN trunking configuration |
 
