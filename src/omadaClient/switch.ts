@@ -1,4 +1,4 @@
-import type { OmadaApiResponse } from '../types/index.js';
+import type { OmadaApiResponse, PoeUsage } from '../types/index.js';
 
 import type { RequestHandler } from './request.js';
 import type { SiteOperations } from './site.js';
@@ -22,6 +22,16 @@ export class SwitchOperations {
         const path = this.buildPath(`/sites/${encodeURIComponent(resolvedSiteId)}/switches/${encodeURIComponent(switchMac)}`);
         const response = await this.request.get<OmadaApiResponse<unknown>>(path);
         return this.request.ensureSuccess(response);
+    }
+
+    /**
+     * Get PoE power usage and budget for every PoE switch in a site (v1 dashboard API; v2 returns 404).
+     */
+    public async getPoeUsage(siteId?: string): Promise<PoeUsage[]> {
+        const resolvedSiteId = this.site.resolveSiteId(siteId);
+        const path = this.buildPath(`/sites/${encodeURIComponent(resolvedSiteId)}/dashboard/poe-usage`);
+        const response = await this.request.get<OmadaApiResponse<PoeUsage[]>>(path);
+        return this.request.ensureSuccess(response) ?? [];
     }
 
     /**

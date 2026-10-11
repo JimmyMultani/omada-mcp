@@ -53,6 +53,7 @@ describe('tools/index', () => {
                 'listIpGroups',
                 'listRoutes',
                 'getSwitch',
+                'getPoeUsage',
                 'getCableTestResults',
                 'getSwitchNetworks',
                 // Write tools

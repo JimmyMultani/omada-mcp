@@ -21,6 +21,7 @@ import type {
     OmadaSiteSummary,
     OswStackDetail,
     PaginatedResult,
+    PoeUsage,
     SetApRadioResult,
     SetLogNotificationsOptions,
     SetLogNotificationsResult,
@@ -398,6 +399,10 @@ export class OmadaClient {
     // Switch operations
     public async getSwitch(switchMac: string, siteId?: string): Promise<unknown> {
         return await this.switchOps.getSwitch(switchMac, siteId);
+    }
+
+    public async getPoeUsage(siteId?: string): Promise<PoeUsage[]> {
+        return await this.switchOps.getPoeUsage(siteId);
     }
 
     public async setSwitchPortProfile(switchMac: string, port: number, profileId: string, siteId?: string): Promise<unknown> {
