@@ -8,7 +8,7 @@ export function registerGetPoeUsageTool(server: McpServer, client: OmadaClient):
         'getPoeUsage',
         {
             description:
-                'Get live PoE power usage for every PoE switch in a site. Returns per-switch budget (totalPower, W), draw (totalPowerUsed, W), and percent used, plus per-port poeSupported, poeEnabled, poePower (W), and poePercent. Use this for PoE headroom; getSwitch only exposes poeMode per port.',
+                'Get live PoE power usage for every PoE switch in a site. Returns per-switch budget (totalPower, W), draw (totalPowerUsed, W), and percent used, plus per-port poeSupported, poeEnabled, poePower (W), and poePercent (relative to each port max, e.g. 30 W, not the switch budget). Watt values are whole numbers. Use this for PoE headroom; getSwitch only exposes poeMode per port.',
             inputSchema: siteInputSchema.shape,
         },
         wrapToolHandler('getPoeUsage', async ({ siteId }) => toToolResult(await client.getPoeUsage(siteId)))

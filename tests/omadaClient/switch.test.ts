@@ -68,14 +68,20 @@ describe('SwitchOperations', () => {
             const mockUsage = [
                 {
                     mac: 'D8-44-89-C3-00-04',
-                    name: 'SG2008P',
-                    portNum: 8,
+                    name: 'Network Switch',
+                    portNum: 4,
                     totalPowerUsed: 25,
-                    totalPercentUsed: 40,
+                    totalPercentUsed: 39.84,
                     totalPower: 62,
                     poePorts: [
-                        { portId: 1, poeSupported: true, poeEnabled: true, poePower: 12, poePercent: 19 },
+                        { portId: 1, poeSupported: true, poeEnabled: true, poePower: 7, poePercent: 23 },
+                        { portId: 2, poeSupported: true, poeEnabled: true, poePower: 6, poePercent: 20 },
+                        { portId: 3, poeSupported: true, poeEnabled: true, poePower: 4, poePercent: 13 },
+                        { portId: 4, poeSupported: true, poeEnabled: true, poePower: 7, poePercent: 23 },
                         { portId: 5, poeSupported: false },
+                        { portId: 6, poeSupported: false },
+                        { portId: 7, poeSupported: false },
+                        { portId: 8, poeSupported: false },
                     ],
                 },
             ];

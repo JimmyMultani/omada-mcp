@@ -9,9 +9,9 @@ export interface PoePortUsage {
     poeSupported: boolean;
     /** Whether PoE is enabled on the port */
     poeEnabled?: boolean;
-    /** Power drawn by the port in watts */
+    /** Power drawn by the port in whole watts */
     poePower?: number;
-    /** Percentage of the switch PoE budget used by the port */
+    /** Percentage of the port's own maximum (e.g. 30 W for 802.3at), not of the switch budget */
     poePercent?: number;
 }
 
@@ -23,11 +23,11 @@ export interface PoeUsage {
     mac: string;
     /** Switch name */
     name: string;
-    /** Number of ports on the switch */
+    /** Number of PoE-capable ports (4 on an 8-port SG2008P), not the total port count */
     portNum: number;
-    /** Total PoE power used in watts */
+    /** Total PoE power used in whole watts */
     totalPowerUsed: number;
-    /** Percentage of the PoE budget used */
+    /** Percentage of the PoE budget used, computed from unrounded power, so it can be fractional */
     totalPercentUsed: number;
     /** Total PoE power budget in watts */
     totalPower: number;
