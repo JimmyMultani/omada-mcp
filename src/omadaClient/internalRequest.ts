@@ -85,6 +85,10 @@ export class InternalRequestHandler {
                 Cookie: sessionCookie,
             },
             withCredentials: true,
+            // An expired session is answered with a 302 to the web UI login page. Following it
+            // would hand back that page's HTML as a 200, which hides the expiry, so surface the
+            // redirect itself and treat it as an auth failure below.
+            maxRedirects: 0,
         };
 
         const method = (requestConfig.method ?? 'GET').toUpperCase();
@@ -122,10 +126,16 @@ export class InternalRequestHandler {
             const errorCode = (response.data as { errorCode?: number } | undefined)?.errorCode;
             const errorMsg = (response.data as { msg?: string } | undefined)?.msg;
 
-            if (retry && this.isSessionExpired(errorCode, errorMsg)) {
+            const isApiResponse = typeof errorCode === 'number';
+
+            if (retry && (!isApiResponse || this.isSessionExpired(errorCode, errorMsg))) {
                 logger.warn('Internal API session expired, re-logging in', { method, url, errorCode });
                 this.auth.clearSession();
                 return this.request<T>(config, false);
+            }
+
+            if (!isApiResponse) {
+                throw this.toUnexpectedResponseError(method, url, response.status, response.headers?.['content-type'], response.data);
             }
 
             return response.data;
@@ -138,11 +148,11 @@ export class InternalRequestHandler {
                 message: error instanceof Error ? error.message : String(error),
             });
 
-            if (!retry || !axios.isAxiosError(error)) {
+            if (!axios.isAxiosError(error)) {
                 throw error;
             }
 
-            if (status === 401 || status === 403) {
+            if (retry && (status === 401 || status === 403 || this.isRedirect(status))) {
                 this.auth.clearSession();
                 return this.request<T>(config, false);
             }
@@ -162,7 +172,26 @@ export class InternalRequestHandler {
         const detail = body?.msg ?? error.message;
         const statusPart = status ? ` (HTTP ${status})` : '';
         const errorCodePart = body?.errorCode !== undefined ? ` (errorCode: ${body.errorCode})` : '';
-        return new Error(`Internal API request failed: ${method} ${url}${statusPart}${errorCodePart} - ${detail}`);
+        const location = this.isRedirect(status) ? error.response?.headers?.location : undefined;
+        const locationPart = location ? ` (redirected to ${location}; session likely rejected)` : '';
+        return new Error(`Internal API request failed: ${method} ${url}${statusPart}${errorCodePart}${locationPart} - ${detail}`);
+    }
+
+    /**
+     * Build an error for a response that isn't an Omada `{ errorCode, ... }` envelope (e.g. an
+     * HTML page), including enough of the status and body to diagnose it.
+     */
+    private toUnexpectedResponseError(method: string, url: string, status: number, contentType: unknown, data: unknown): Error {
+        const raw = typeof data === 'string' ? data : JSON.stringify(data);
+        const snippet = (raw ?? '').replace(/\s+/g, ' ').trim().slice(0, 200);
+        const typePart = contentType ? `, ${String(contentType)}` : '';
+        return new Error(
+            `Internal API request failed: ${method} ${url} (HTTP ${status}${typePart}) - unexpected response with no errorCode, even after re-login: ${snippet}`
+        );
+    }
+
+    private isRedirect(status?: number): boolean {
+        return status !== undefined && status >= 300 && status < 400;
     }
 
     /**
