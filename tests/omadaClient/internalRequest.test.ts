@@ -161,6 +161,83 @@ describe('InternalRequestHandler', () => {
         });
     });
 
+    describe('session retry on redirect to login or non-API response', () => {
+        const loginRedirect = () =>
+            Object.assign(new Error('Request failed with status code 302'), {
+                isAxiosError: true,
+                response: { status: 302, headers: { location: '/test-omadac/login' } },
+            });
+
+        it('should not follow redirects, so an expired session is not masked by the login page', async () => {
+            const { InternalRequestHandler } = await import('../../src/omadaClient/internalRequest.js');
+
+            mockAxiosInstance.request.mockResolvedValue({ status: 200, data: { errorCode: 0, result: {} } });
+
+            const handler = new InternalRequestHandler(mockAxiosInstance as never, mockAuthManager as never, 'test-omadac');
+            await handler.get('/sites/site-123/setting/profiles/groups');
+
+            expect(mockAxiosInstance.request).toHaveBeenCalledWith(expect.objectContaining({ maxRedirects: 0 }));
+        });
+
+        it('should clear the session and retry once on a 302 redirect to the login page', async () => {
+            const { InternalRequestHandler } = await import('../../src/omadaClient/internalRequest.js');
+
+            mockAxiosInstance.request
+                .mockRejectedValueOnce(loginRedirect())
+                .mockResolvedValueOnce({ status: 200, data: { errorCode: 0, result: { data: [] } } });
+
+            const handler = new InternalRequestHandler(mockAxiosInstance as never, mockAuthManager as never, 'test-omadac');
+            const result = await handler.get('/sites/site-123/setting/profiles/groups');
+
+            expect(mockAuthManager.clearSession).toHaveBeenCalledTimes(1);
+            expect(mockAxiosInstance.request).toHaveBeenCalledTimes(2);
+            expect(result).toEqual({ errorCode: 0, result: { data: [] } });
+        });
+
+        it('should surface the redirect target when the redirect persists after re-login', async () => {
+            const { InternalRequestHandler } = await import('../../src/omadaClient/internalRequest.js');
+
+            mockAxiosInstance.request.mockRejectedValueOnce(loginRedirect()).mockRejectedValueOnce(loginRedirect());
+
+            const handler = new InternalRequestHandler(mockAxiosInstance as never, mockAuthManager as never, 'test-omadac');
+
+            await expect(handler.get('/sites/site-123/setting/profiles/groups')).rejects.toThrow(
+                'Internal API request failed: GET /test-omadac/api/v2/sites/site-123/setting/profiles/groups (HTTP 302) (redirected to /test-omadac/login; session likely rejected)'
+            );
+        });
+
+        it('should clear the session and retry once when the response is not an Omada API envelope', async () => {
+            const { InternalRequestHandler } = await import('../../src/omadaClient/internalRequest.js');
+
+            mockAxiosInstance.request
+                .mockResolvedValueOnce({ status: 200, headers: { 'content-type': 'text/html' }, data: '<!DOCTYPE html><html></html>' })
+                .mockResolvedValueOnce({ status: 200, data: { errorCode: 0, result: { data: [] } } });
+
+            const handler = new InternalRequestHandler(mockAxiosInstance as never, mockAuthManager as never, 'test-omadac');
+            const result = await handler.get('/sites/site-123/setting/profiles/groups');
+
+            expect(mockAuthManager.clearSession).toHaveBeenCalledTimes(1);
+            expect(result).toEqual({ errorCode: 0, result: { data: [] } });
+        });
+
+        it('should report the status, content type, and body when the response is still not an API envelope after re-login', async () => {
+            const { InternalRequestHandler } = await import('../../src/omadaClient/internalRequest.js');
+
+            mockAxiosInstance.request.mockResolvedValue({
+                status: 200,
+                headers: { 'content-type': 'text/html;charset=utf-8' },
+                data: '<!DOCTYPE html>\n<html lang="">\n</html>',
+            });
+
+            const handler = new InternalRequestHandler(mockAxiosInstance as never, mockAuthManager as never, 'test-omadac');
+
+            await expect(handler.get('/sites/site-123/setting/profiles/groups')).rejects.toThrow(
+                'Internal API request failed: GET /test-omadac/api/v2/sites/site-123/setting/profiles/groups (HTTP 200, text/html;charset=utf-8) - unexpected response with no errorCode, even after re-login: <!DOCTYPE html> <html lang=""> </html>'
+            );
+            expect(mockAxiosInstance.request).toHaveBeenCalledTimes(2);
+        });
+    });
+
     describe('HTTP-level failures', () => {
         it('should surface the method, endpoint, status, and response message for a non-auth HTTP error', async () => {
             const { InternalRequestHandler } = await import('../../src/omadaClient/internalRequest.js');
